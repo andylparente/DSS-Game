@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL2_image/SDL_image.h>
 
 // Dimensoes constantes da tela
 const int SCREEN_WIDTH = 800;
@@ -15,16 +14,13 @@ int g_STATE_GAMEPLAY = 4;
 int g_STATE_PAUSE = 5;
 
 // Iniciliza o estado do jogo como tela inicial
-int g_gameState = STATE_TITLE_SCREEN;
+int g_gameState = g_STATE_TITLE_SCREEN;
 
 // Inicializa o SDL e cria janela
 void init_boot_game();
 	
 // Carrega imagem PNG como textura
 void load_Texture( char* l_Path );
-
-//Aplica e atualiza a textura
-void apply_Texture();
 
 // Limpa memoria e fecha o SDL e o jogo
 int close_game();
@@ -83,14 +79,26 @@ void init_boot_game()
 		}
 	}
 	
-	// Carrega a imagem PNG da empresa em textura, depois aplica a textura e a atualiza a tela
+	// Carrega a imagem PNG da empresa em textura
 	load_Texture( "empresa.png" );
-	apply_Texture();
+	
+	// Limpa a tela
+	SDL_RenderClear( g_Renderer );
+
+	// Renderiza a textura a tela
+	SDL_RenderCopy( g_Renderer, g_Texture, NULL, NULL );
+
+	// Atualiza a tela
+	SDL_RenderPresent( g_Renderer );
+	
+	// Espera alguns segundos
 	SDL_Delay( 3000 );
 	
 	// Carrega a imagem PNG dos creditos ao SDL 2.0 em textura, depois aplica a textura e a atualiza a tela
 	load_Texture( "sdlcredits.png" );
-	apply_Texture();
+	SDL_RenderClear( g_Renderer );
+	SDL_RenderCopy( g_Renderer, g_Texture, NULL, NULL );
+	SDL_RenderPresent( g_Renderer );
 	SDL_Delay( 3000 );
 }
 
@@ -171,16 +179,17 @@ void load_Texture( char* l_Path )
 	}
 }
 
-void apply_Texture()
+void title_screen_logic();
 {
-	// Limpa tela
+	// Carrega a imagem PNG dos creditos ao SDL 2.0 em textura
+	load_Texture( "titlescreen.png" );
 	SDL_RenderClear( g_Renderer );
-
-	// Renderiza a textura a tela
 	SDL_RenderCopy( g_Renderer, g_Texture, NULL, NULL );
-
-	// Atualiza a tela
+	
+	// Tentar fazer carregar e aplicar "botao_titlescreen.png" no meio de "titlescreen.png" 
+	
 	SDL_RenderPresent( g_Renderer );
+	
 }
 
 int close_game()

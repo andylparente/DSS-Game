@@ -99,57 +99,55 @@ int main(int argc, char *argv[])
 	// Iniciando o jogo
 	init_boot_game() ;
 	
-	else
+	// Iniciando o jogo
+	init_boot_game() ;
+	
+	// Flag do loop principal
+	int l_quit_game = 0;
+		
+	// Cuidador de evento
+	SDL_Event e;
+
+	// Iniciliza o estado do jogo como tela inicial
+	gameState = STATE_TITLE_SCREEN;
+
+	// Enquanto a aplicação esta rodando
+	while( l_quit_game != 1 )
 	{
-		// Flag do loop principal
-		int quit_game = 0;
-		
-		// Flag do loop principal
-		int l_quit_game = 0;
-		
-		// Cuidador de evento
-		SDL_Event e;
-
-		// Iniciliza o estado do jogo como tela inicial
-		gameState = STATE_TITLE_SCREEN;
-
-		// Enquanto a aplicação esta rodando
-		while( l_quit_game != 1 )
+		// Cuida dos eventos na fila
+		while( SDL_PollEvent( &e ) != 0 )
 		{
-			// Cuida dos eventos na fila
-			while( SDL_PollEvent( &e ) != 0 )
+			// Usuario deseja sair
+			if( e.type == SDL_QUIT )
 			{
-				// Usuario deseja sair
-				if( e.type == SDL_QUIT )
-				{
-					l_quit_game = 1;
-				}
-			}
-
-			switch ( gameState )
-			{
-				case STATE_TITLE_SCREEN:
-					title_screen_logic();
-					break;
-
-				case STATE_MAIN_MENU: 
-					main_menu_logic(); 
-					break; 
-
-				case STATE_GAMEPLAY: 
-					gameplay_logic(); 
-					break;
-
-				case STATE_OPTIONS: 
-					options_logic(); 
-					break;
-
-				case STATE_PAUSE: 
-					pause_logic(); 
-					break; 
+				l_quit_game = 1;
 			}
 		}
-	}	
+
+		switch ( gameState )
+		{
+			case STATE_TITLE_SCREEN:
+				title_screen_logic();
+				break;
+
+			case STATE_MAIN_MENU: 
+				main_menu_logic(); 
+				break; 
+
+			case STATE_GAMEPLAY: 
+				gameplay_logic(); 
+				break;
+
+			case STATE_OPTIONS: 
+				options_logic(); 
+				break;
+
+			case STATE_PAUSE: 
+				pause_logic(); 
+				break; 
+		}
+	}
+	
 	return close_game();
 }
 

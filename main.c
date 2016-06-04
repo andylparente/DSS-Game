@@ -92,8 +92,6 @@ void init_boot_game()
 	load_Texture( "sdlcredits.png" );
 	apply_Texture();
 	SDL_Delay( 3000 );
-
-	return sucess;
 }
 
 int main(int argc, char *argv[])

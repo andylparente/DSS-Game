@@ -1,20 +1,30 @@
 #include <stdio.h>
 #include <string.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL2_image/SDL_image.h>
 
 // Dimensoes constantes da tela
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+// Cria os estados do jogo
+enum gameState
+{ 
+	STATE_TITLE_SCREEN,
+	STATE_MAIN_MENU,
+	STATE_GAMEPLAY,
+	STATE_OPTIONS,
+	STATE_PAUSE
+};
+
 // Inicializa o SDL e cria janela
 void init_boot_game();
-
+	
 // Carrega imagem PNG como textura
 void load_Texture( char* l_Path );
 
 //Aplica e atualiza a textura
-void apply_Texture ();
+void apply_Texture();
 
 // Limpa memoria e fecha o SDL e o jogo
 int close_game();
@@ -28,9 +38,9 @@ SDL_Renderer* g_Renderer = NULL;
 // Textura atual sendo apresentada
 SDL_Texture* g_Texture = NULL;
 
-/*===================================================================================================================================================================================*/
-/*=====================================================================SEPARANDO=====================================================================================================*/
-/*===================================================================================================================================================================================*/
+/*========================================================================================================================================*/
+/*==================================================================SEPARANDO=============================================================*/
+/*========================================================================================================================================*/
 
 void init_boot_game()
 {
@@ -43,7 +53,7 @@ void init_boot_game()
 	else
 	{
 		//Cria a janela
-		g_Window = SDL_CreateWindow( "DSS_Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		g_Window = SDL_CreateWindow( "Peleh Legacy v0.04", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( g_Window == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -72,6 +82,16 @@ void init_boot_game()
 			}
 		}
 	}
+	
+	// Carrega a imagem PNG da empresa em textura, depois aplica a textura e a atualiza a tela
+	load_Texture( "empresa.png" );
+	apply_Texture();
+	SDL_Delay( 3000 );
+	
+	// Carrega a imagem PNG dos creditos ao SDL 2.0 em textura, depois aplica a textura e a atualiza a tela
+	load_Texture( "sdlcredits.png" );
+	apply_Texture();
+	SDL_Delay( 3000 );
 }
 
 int main(int argc, char *argv[])
@@ -82,18 +102,11 @@ int main(int argc, char *argv[])
 	// Flag do loop principal
 	int l_quit_game = 0;
 		
-	// Carrega a imagem PNG da empresa em textura, depois aplica a textura e a atualiza a tela
-	load_Texture( "empresa.png" );
-	apply_Texture ();
-	SDL_Delay( 3000 );
-		
-	// Carrega a imagem PNG dos creditos ao SDL 2.0 em textura, depois aplica a textura e a atualiza a tela
-	load_Texture( "sdlcredits.png" );
-	apply_Texture ();
-	SDL_Delay( 3000 );
-
 	// Cuidador de evento
 	SDL_Event e;
+
+	// Iniciliza o estado do jogo como tela inicial
+	gameState = STATE_TITLE_SCREEN;
 
 	// Enquanto a aplicação esta rodando
 	while( l_quit_game != 1 )
@@ -107,10 +120,29 @@ int main(int argc, char *argv[])
 				l_quit_game = 1;
 			}
 		}
-			
-		// Carrega a imagem PNG da tela inicial em textura, depois aplica a textura e a atualiza a tela
-		load_Texture( "titlescreen.png" );
-		apply_Texture ();
+
+		switch ( gameState )
+		{
+			case STATE_TITLE_SCREEN:
+				title_screen_logic();
+				break;
+
+			case STATE_MAIN_MENU: 
+				main_menu_logic(); 
+				break; 
+
+			case STATE_GAMEPLAY: 
+				gameplay_logic(); 
+				break;
+
+			case STATE_OPTIONS: 
+				options_logic(); 
+				break;
+
+			case STATE_PAUSE: 
+				pause_logic(); 
+				break; 
+		}
 	}
 	
 	return close_game();
@@ -142,7 +174,7 @@ void load_Texture( char* l_Path )
 	}
 }
 
-void apply_Texture ()
+void apply_Texture()
 {
 	// Limpa tela
 	SDL_RenderClear( g_Renderer );

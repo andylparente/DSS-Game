@@ -134,7 +134,7 @@ void load_Texture( char* l_Path )
         g_Texture = SDL_CreateTextureFromSurface( g_Renderer, l_loadedSurface );
 		if( g_Texture == NULL )
 		{
-			printf( "Unable to create texture from %s! SDL Error: %s\n", l_path, SDL_GetError() );
+			printf( "Unable to create texture from %s! SDL Error: %s\n", l_Path, SDL_GetError() );
 		}
 
 		// Se livra da surface que nao sera usada

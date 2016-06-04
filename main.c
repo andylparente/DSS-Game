@@ -99,9 +99,6 @@ int main(int argc, char *argv[])
 	// Iniciando o jogo
 	init_boot_game() ;
 	
-	// Iniciando o jogo
-	init_boot_game() ;
-	
 	// Flag do loop principal
 	int l_quit_game = 0;
 		

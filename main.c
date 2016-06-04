@@ -8,14 +8,14 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
 // Cria os estados do jogo
-enum gameState
-{ 
-	STATE_TITLE_SCREEN,
-	STATE_MAIN_MENU,
-	STATE_GAMEPLAY,
-	STATE_OPTIONS,
-	STATE_PAUSE
-};
+int g_STATE_TITLE_SCREEN = 1;
+int g_STATE_MAIN_MENU = 2;
+int g_STATE_OPTIONS = 3;
+int g_STATE_GAMEPLAY = 4;
+int g_STATE_PAUSE = 5;
+
+// Iniciliza o estado do jogo como tela inicial
+int g_gameState = STATE_TITLE_SCREEN;
 
 // Inicializa o SDL e cria janela
 void init_boot_game();
@@ -105,9 +105,6 @@ int main(int argc, char *argv[])
 	// Cuidador de evento
 	SDL_Event e;
 
-	// Iniciliza o estado do jogo como tela inicial
-	gameState = STATE_TITLE_SCREEN;
-
 	// Enquanto a aplicação esta rodando
 	while( l_quit_game != 1 )
 	{
@@ -166,7 +163,7 @@ void load_Texture( char* l_Path )
         g_Texture = SDL_CreateTextureFromSurface( g_Renderer, l_loadedSurface );
 		if( g_Texture == NULL )
 		{
-			printf( "Unable to create texture from %s! SDL Error: %s\n", l_path, SDL_GetError() );
+			printf( "Unable to create texture from %s! SDL Error: %s\n", l_Path, SDL_GetError() );
 		}
 
 		// Se livra da surface que nao sera usada

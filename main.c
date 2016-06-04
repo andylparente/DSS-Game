@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 			// Usuario deseja sair
 			if( e.type == SDL_QUIT )
 			{
-				quit_game = 1;
+				l_quit_game = 1;
 			}
 		}
 			

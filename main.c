@@ -14,7 +14,7 @@ void init_boot_game();
 void load_Texture( char* l_Path );
 
 //Aplica e atualiza a textura
-void apply_Texture ();
+void apply_Texture();
 
 // Limpa memoria e fecha o SDL e o jogo
 int close_game();

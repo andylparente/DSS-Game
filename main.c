@@ -225,13 +225,13 @@ int main_menu_logic( int argc, char *argv[] )
 {
 	// Carrega a imagem do menu principal
 	load_Texture( "pele.png" );
-    SDL_RenderClear( g_renderer );
-    SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-    SDL_RenderPresent( g_renderer );
+	SDL_RenderClear( g_renderer );
+	SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
+	SDL_RenderPresent( g_renderer );
     
-    SDL_Event e;
+    	SDL_Event e;
     
-    // Navega pelo menu e muda o g_gameState
+    	// Navega pelo menu e muda o g_gameState
 	while( g_gameState == 2 )
         {
                 while( SDL_PollEvent( &e ) != 0 )
@@ -255,19 +255,19 @@ int gameplay_logic( int argc, char *argv[] )
 	float velx = 2.5;	
 	
 	load_Texture( "mapa.png" ); 
-    SDL_RenderClear( g_renderer );
-    SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
+	SDL_RenderClear( g_renderer );
+    	SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
     
-    SDL_Event e;
+    	SDL_Event e;
     
-    // Area que sera apresentada da imagem fonte
+    	// Area que sera apresentada da imagem fonte
 	SDL_Rect l_srcRect;
 	l_srcRect.x = 0;
-    l_srcRect.y = 0;
-    l_srcRect.w = 80;
-    l_srcRect.h = 80;    
+	 l_srcRect.y = 0;
+    	l_srcRect.w = 80;
+    	l_srcRect.h = 80;    
     
-    // Area a imagem fonte sera aplicada
+    	// Area a imagem fonte sera aplicada
 	SDL_Rect l_dstRect;	
 	l_dstRect.x = SCREEN_WIDTH/2;
   	l_dstRect.y = SCREEN_HEIGHT/2;
@@ -278,40 +278,40 @@ int gameplay_logic( int argc, char *argv[] )
 	SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
 	SDL_RenderPresent( g_renderer );
 
-    while( g_gameState == 3 )
-    {
-	    while( SDL_PollEvent( &e ) != 0 )
-        {
-            if( e.type == SDL_KEYDOWN )
+	 while( g_gameState == 3 )
+	 {
+	 	while( SDL_PollEvent( &e ) != 0 )
+        	{
+            		if( e.type == SDL_KEYDOWN )
 			{
-            	switch( e.key.keysym.sym )
-                {
-                	case SDLK_RIGHT:
-               			l_dstRect.x += velx;
-                        break;
-
-                    case SDLK_LEFT: 
-						l_dstRect.x -= velx;
-                        break;
-
-                    case SDLK_UP:
-                        l_dstRect.y -= velx;
-                        l_srcRect.x -= l_srcRect.w;
-                        break;
-
-                    case SDLK_DOWN:
-                        l_dstRect.y += velx;
-                        l_srcRect.x -= l_srcRect.w; 
-                        break;
-
-                   case SDLK_RETURN:
-                        SDL_QUIT;
-                        return 0;                                                                     
+            			switch( e.key.keysym.sym )
+        			{
+					case SDLK_RIGHT:
+        					l_dstRect.x += velx;
 						break;
-                }
-            }
-        }
-    }
+
+					case SDLK_LEFT: 
+						l_dstRect.x -= velx;
+						break;
+
+					case SDLK_UP:
+						l_dstRect.y -= velx;
+						l_srcRect.x -= l_srcRect.w;
+						break;
+
+					case SDLK_DOWN:
+						l_dstRect.y += velx;
+						l_srcRect.x -= l_srcRect.w; 
+						break;
+
+					case SDLK_RETURN:
+						SDL_QUIT;
+						return 0;                                                                     
+						break;
+                		}
+            		}
+        	}
+	}
 }
 
 int close_game()

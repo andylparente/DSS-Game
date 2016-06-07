@@ -206,17 +206,16 @@ int title_screen_logic( int argc, char *argv[] )
 	while( g_gameState == 1 )
 	{
 		while( SDL_PollEvent( &e ) != 0 )
-        {
-            if( e.type == SDL_KEYDOWN )
+        	{
+        		if( e.type == SDL_KEYDOWN )
 			{
 				switch( e.key.keysym.sym )
-                {
-              		case SDLK_SPACE:
-                  	g_gameState = 2;
-                   	break;
-                }
-
-            }
+        	        	{
+              				case SDLK_SPACE:
+                  				g_gameState = 2;
+                   				break;
+        			}
+        		}
 		}	
 	}
 }

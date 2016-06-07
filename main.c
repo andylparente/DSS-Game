@@ -200,9 +200,10 @@ int title_screen_logic( int argc, char *argv[] )
 	load_Texture( "titlescreen.png" );
 	SDL_RenderClear( g_renderer );
 	SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-	SDL_Event e;
 	SDL_RenderPresent( g_renderer );
-
+	
+	SDL_Event e;
+	
 	while( g_gameState == 1 )
 	{
 		while( SDL_PollEvent( &e ) != 0 )
@@ -262,7 +263,7 @@ int gameplay_logic( int argc, char *argv[] )
     	// Area que sera apresentada da imagem fonte
 	SDL_Rect l_srcRect;
 	l_srcRect.x = 0;
-	 l_srcRect.y = 0;
+	l_srcRect.y = 0;
     	l_srcRect.w = 80;
     	l_srcRect.h = 80;    
     

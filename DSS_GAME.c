@@ -7,7 +7,7 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;	
 
-// Tempo maximo de duraÁ„o de efeito sonoro
+// Tempo maximo de dura√ß√£o de efeito sonoro
 const int MAX_FOR_SFX = 4000;
 
 // Flag para sair do jogo
@@ -16,10 +16,10 @@ int g_quitGame = 0;
 // Cria os estados do jogo
 int STATE_TITLE_SCREEN = 1;
 int STATE_MAIN_MENU = 2;
-int STATE_OPTIONS = 3;
+int STATE_OPTIONS = 6;
 int STATE_HIGHSCORE = 4;
 int STATE_CREDITS = 5;
-int STATE_GAMEPLAY = 6;
+int STATE_GAMEPLAY = 3;
 int STATE_PAUSE = 7;
 
 
@@ -79,7 +79,7 @@ void init_boot_game()
 		// Apresenta o erro causado 
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		
-		// Fechar· o jogo ao passar pelo loop principal
+		// Fechar√° o jogo ao passar pelo loop principal
 		g_quitGame = 1;
 	}
 	
@@ -160,7 +160,7 @@ int main( int argc, char *argv[] )
 	// Cuidador de evento
 	SDL_Event e;
 
-	// Enquanto a aplicaÁ„o esta rodando
+	// Enquanto a aplica√ß√£o esta rodando
 	while( g_quitGame != 1 )
 	{
 		// Cuida dos eventos na fila
@@ -173,33 +173,34 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		// Muda para a lÛgica de cada g_gameState
+		// Muda para a l√≥gica de cada g_gameState
 		switch ( g_gameState )
 		{
-			case STATE_TITLE_SCREEN:
+			case 1:
 				title_screen_logic();
 				break;
 
-			case STATE_MAIN_MENU: 
+			case 2: 
 				main_menu_logic(); 
 				break; 
 
-			case STATE_GAMEPLAY:
+			case 3:
 				gameplay_logic(); 
 				break;
 
-			case STATE_OPTIONS:
+			case 4:
 				//options_logic(); 
 				break;
 				
-			case STATE_HIGHSCORE:
+			case 5:
+				g_quitGame = 1;
 				//highscore_logic();
 				break;
 				
-			case STATE_CREDITS:
+			case 6:
 				//credits_logic();		
 
-			case STATE_PAUSE:
+			case 7:
 				//pause_logic(); 
 				break; 
 		}
@@ -378,10 +379,10 @@ int main_menu_logic( int argc, char *argv[] )
                     	break;
 
                     case SDLK_UP:
-                    	l_dstRect.x -= 42;
-                    	if ( l_dstRect < 205 )
+                    	l_dstRect.y -= 42;
+                    	if ( l_dstRect.y < 205 )
                     	{
-                    		l_dstRect.x = 373;
+                    		l_dstRect.y = 373;
 						}
                     	free_texture;
                     	load_Texture( "arrow.png" );
@@ -390,10 +391,10 @@ int main_menu_logic( int argc, char *argv[] )
                     	break;
 
                 	case SDLK_DOWN:
-                		l_dstRect.x += 42;
-                    	if ( l_dstRect > 373 )
+                		l_dstRect.y += 42;
+                    	if ( l_dstRect.y > 373 )
                     	{
-                    		l_dstRect.x = 205;
+                    		l_dstRect.y = 205;
 						}
                     	free_texture;
                     	load_Texture( "arrow.png" );
@@ -402,7 +403,7 @@ int main_menu_logic( int argc, char *argv[] )
                     	break;
                     	
                     case SDLK_RETURN:
-                    	switch( l_dstRect )
+                    	switch( l_dstRect.y )
                     	{
                     		case 205:
                     			g_gameState = STATE_GAMEPLAY;
@@ -421,7 +422,7 @@ int main_menu_logic( int argc, char *argv[] )
                     			break;
                     			
                     		case 373:
-                    			g_quitGame = 1;
+					g_gameState = 5;
                     			break;
 						}
                     	break;
@@ -466,7 +467,18 @@ int gameplay_logic( int argc, char *argv[] )
 	 while( g_gameState == 3 )
 	 {
 	 	while( SDL_PollEvent( &e ) != 0 )
-        {
+		{
+
+		free_texture();
+	        SDL_RenderClear( g_renderer );		
+		load_Texture( "mapa.png" );
+	        SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
+                free_texture();
+		load_Texture( "sprites/sombra100-60.png" );
+	        SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
+        	SDL_RenderPresent( g_renderer );
+
+	
            	if( e.type == SDL_KEYDOWN )
 			{
            		switch( e.key.keysym.sym )
@@ -481,16 +493,16 @@ int gameplay_logic( int argc, char *argv[] )
 
 					case SDLK_UP:
 						l_dstRect.y -= velx;
-						l_srcRect.x -= l_srcRect.w;
+	//					l_srcRect.x -= l_srcRect.w;
 						break;
 
 					case SDLK_DOWN:
 						l_dstRect.y += velx;
-						l_srcRect.x -= l_srcRect.w; 
+	//					l_srcRect.x -= l_srcRect.w; 
 						break;
 
 					case SDLK_RETURN:
-                        g_quitGame = 1;                                      
+						g_gameState = 5;                                     
 						break;
            		}
         	}

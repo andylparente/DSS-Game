@@ -119,12 +119,12 @@ void init_boot_game()
 				else
 				{
 					// Inicializa o carregamento de sons e musicas
-	                if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
-	                {
-	                    printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
-	                    g_quitGame = 1;
-	                }
-	        	}
+			                if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+			                {
+			                    printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+			                    g_quitGame = 1;
+			                }
+	        		}
 			}
 		}
 	}
@@ -224,7 +224,7 @@ void load_Texture( char* l_Path )
 	else
 	{
 		// Gera textura atraves da surface
-        g_texture = SDL_CreateTextureFromSurface( g_renderer, l_loadedSurface );
+        	g_texture = SDL_CreateTextureFromSurface( g_renderer, l_loadedSurface );
 		if( g_texture == NULL )
 		{
 			printf( "Unable to create texture from %s! SDL Error: %s\n", l_Path, SDL_GetError() );
@@ -248,27 +248,27 @@ void load_music( char* l_Path )
 	// Carrega musica
 	g_music = Mix_LoadMUS( l_Path );
 	if( g_music == NULL )
-    {
-        printf( "Failed to load %s [music]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
-        g_quitGame = 1;
-    }
+    	{
+		printf( "Failed to load %s [music]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
+		g_quitGame = 1;
+    	}
 
-    // Reproduz a musica
-    Mix_PlayMusic( g_music, -1 );
+	// Reproduz a musica
+	Mix_PlayMusic( g_music, -1 );
 }
 
 void load_sfx( char* l_Path )
 {
 	// Carrega efeitos sonoros
-    g_sfx = Mix_LoadWAV( l_Path );
-    if( g_sfx == NULL )
-    {
-        printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
-        g_quitGame = 1;
-    }
+	g_sfx = Mix_LoadWAV( l_Path );
+	if( g_sfx == NULL )
+	{
+		printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
+		g_quitGame = 1;
+	}
 
-    // Reproduz o efeito sonoro
-    Mix_PlayChannel( -1, g_sfx, 0 );
+	// Reproduz o efeito sonoro
+	Mix_PlayChannel( -1, g_sfx, 0 );
 }
 
 void free_music_sfx( char type )
@@ -316,19 +316,19 @@ int title_screen_logic( int argc, char *argv[] )
 	while( g_gameState == 1 )
 	{
 		while( SDL_PollEvent( &e ) != 0 )
-        {
-        	if( e.type == SDL_KEYDOWN )
+        	{
+        		if( e.type == SDL_KEYDOWN )
 			{
 				switch( e.key.keysym.sym )
-        	   	{
-            		case SDLK_SPACE:
-            			// Carrega sfx 
-            			load_sfx( "sound_music/one_ring_from_church_bell.wav" );
-            			SDL_Delay( 4000 );
-            			g_gameState = 2;
-            			break;
-        		}
-        	}
+        	   		{
+		            		case SDLK_SPACE:
+		            			// Carrega sfx 
+		            			load_sfx( "sound_music/one_ring_from_church_bell.wav" );
+		            			SDL_Delay( 4000 );
+		            			g_gameState = 2;
+		            			break;
+				}
+			}
 		}	
 	}
 }
@@ -360,74 +360,74 @@ int main_menu_logic( int argc, char *argv[] )
 	// Carrega musica do menu principal
 	load_music( "sound_music/suspended.mp3" );
     
-    SDL_Event e;
+	SDL_Event e;
     
-    // Navega pelo menu e muda o g_gameState
+	// Navega pelo menu e muda o g_gameState
 	while( g_gameState == 2 )
-    {
-        while( SDL_PollEvent( &e ) != 0 )
-        {
-            if( e.type == SDL_KEYDOWN )
-    	    {
-    	    	load_sfx( "sound_music/wood_coffin_lid_impact.wav" );
+	{
+        	while( SDL_PollEvent( &e ) != 0 )
+        	{
+            		if( e.type == SDL_KEYDOWN )
+    	    		{
+    	    			load_sfx( "sound_music/wood_coffin_lid_impact.wav" );
 
-                switch( e.key.keysym.sym )
-                {
-                    case SDLK_BACKSPACE:
-                    	g_gameState = 1;
-                    	break;
+                		switch( e.key.keysym.sym )
+                		{
+                    			case SDLK_BACKSPACE:
+                    				g_gameState = 1;
+                    				break;
 
-                    case SDLK_UP:
-                    	l_dstRect.x -= 42;
-                    	if ( l_dstRect < 205 )
-                    	{
-                    		l_dstRect.x = 373;
+					case SDLK_UP:
+						l_dstRect.x -= 42;
+						if ( l_dstRect < 205 )
+						{
+							l_dstRect.x = 373;
 						}
-                    	free_texture;
-                    	load_Texture( "arrow.png" );
-                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
-                    	SDL_RenderPresent( g_renderer );
-                    	break;
+			                    	free_texture;
+			                    	load_Texture( "arrow.png" );
+			                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
+			                    	SDL_RenderPresent( g_renderer );
+			                    	break;
 
-                	case SDLK_DOWN:
-                		l_dstRect.x += 42;
-                    	if ( l_dstRect > 373 )
-                    	{
-                    		l_dstRect.x = 205;
+		                	case SDLK_DOWN:
+		                		l_dstRect.x += 42;
+			                    	if ( l_dstRect > 373 )
+			                    	{
+			                    		l_dstRect.x = 205;
 						}
-                    	free_texture;
-                    	load_Texture( "arrow.png" );
-                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
-                    	SDL_RenderPresent( g_renderer );
-                    	break;
+			                    	free_texture;
+			                    	load_Texture( "arrow.png" );
+			                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
+			                    	SDL_RenderPresent( g_renderer );
+			                    	break;
                     	
-                    case SDLK_RETURN:
-                    	switch( l_dstRect )
-                    	{
-                    		case 205:
-                    			g_gameState = STATE_GAMEPLAY;
-                    			break;
-                    			
-                    		case 247:
-                    			g_gameState = STATE_OPTIONS;
-                    			break;
-                    			
-                    		case 289:
-                    			g_gameState = STATE_HIGHSCORE;
-                    			break;
-                    			
-                    		case 331:
-                    			g_gameState = STATE_CREDITS;
-                    			break;
-                    			
-                    		case 373:
-                    			g_quitGame = 1;
-                    			break;
+					case SDLK_RETURN:
+			                    	switch( l_dstRect )
+			                    	{
+			                    		case 205:
+			                    			g_gameState = STATE_GAMEPLAY;
+			                    			break;
+			                    			
+			                    		case 247:
+			                    			g_gameState = STATE_OPTIONS;
+			                    			break;
+			                    			
+			                    		case 289:
+			                    			g_gameState = STATE_HIGHSCORE;
+			                    			break;
+			                    			
+			                    		case 331:
+			                    			g_gameState = STATE_CREDITS;
+			                    			break;
+			                    			
+			                    		case 373:
+			                    			g_quitGame = 1;
+			                    			break;
 						}
-                    	break;
-                }
-            }
-        }
+						break;
+                		}
+            		}
+        	}
 	}
 }
 
@@ -441,18 +441,18 @@ int gameplay_logic( int argc, char *argv[] )
 	
 	load_Texture( "mapa.png" ); 
 	SDL_RenderClear( g_renderer );
-    SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
+	SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
     
-    SDL_Event e;
+	SDL_Event e;
     
-    // Area que sera apresentada da imagem fonte
+	// Area que sera apresentada da imagem fonte
 	SDL_Rect l_srcRect;
 	l_srcRect.x = 0;
 	l_srcRect.y = 0;
-    l_srcRect.w = 80;
-    l_srcRect.h = 80;    
+	l_srcRect.w = 80;
+	l_srcRect.h = 80;    
     
-    // Area onde a imagem fonte sera aplicada
+	// Area onde a imagem fonte sera aplicada
 	SDL_Rect l_dstRect;	
 	l_dstRect.x = SCREEN_WIDTH/2;
   	l_dstRect.y = SCREEN_HEIGHT/2;
@@ -465,12 +465,12 @@ int gameplay_logic( int argc, char *argv[] )
 
 	 while( g_gameState == 3 )
 	 {
-	 	while( SDL_PollEvent( &e ) != 0 )
-        {
-           	if( e.type == SDL_KEYDOWN )
+		while( SDL_PollEvent( &e ) != 0 )
+		{
+           		if( e.type == SDL_KEYDOWN )
 			{
-           		switch( e.key.keysym.sym )
-        		{
+           			switch( e.key.keysym.sym )
+        			{
 					case SDLK_RIGHT:
         				l_dstRect.x += velx;
 						break;
@@ -490,11 +490,11 @@ int gameplay_logic( int argc, char *argv[] )
 						break;
 
 					case SDLK_RETURN:
-                        g_quitGame = 1;                                      
+                        			g_quitGame = 1;                                      
 						break;
-           		}
+           			}
+        		}
         	}
-        }
 	}
 }
 

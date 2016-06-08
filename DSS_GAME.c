@@ -7,7 +7,7 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;	
 
-// Tempo maximo de duraÁ„o de efeito sonoro
+// Tempo maximo de dura√ß√£o de efeito sonoro
 const int MAX_FOR_SFX = 4000;
 
 // Flag para sair do jogo
@@ -17,8 +17,11 @@ int g_quitGame = 0;
 int STATE_TITLE_SCREEN = 1;
 int STATE_MAIN_MENU = 2;
 int STATE_OPTIONS = 3;
-int STATE_GAMEPLAY = 4;
-int STATE_PAUSE = 5;
+int STATE_HIGHSCORE = 4;
+int STATE_CREDITS = 5;
+int STATE_GAMEPLAY = 6;
+int STATE_PAUSE = 7;
+
 
 // Iniciliza o estado do jogo como tela inicial
 int g_gameState = 1;
@@ -76,7 +79,7 @@ void init_boot_game()
 		// Apresenta o erro causado 
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		
-		// Fechar· o jogo ao passar pelo loop principal
+		// Fechar√° o jogo ao passar pelo loop principal
 		g_quitGame = 1;
 	}
 	
@@ -157,7 +160,7 @@ int main( int argc, char *argv[] )
 	// Cuidador de evento
 	SDL_Event e;
 
-	// Enquanto a aplicaÁ„o esta rodando
+	// Enquanto a aplica√ß√£o esta rodando
 	while( g_quitGame != 1 )
 	{
 		// Cuida dos eventos na fila
@@ -170,27 +173,34 @@ int main( int argc, char *argv[] )
 			}
 		}
 
-		// Muda para a lÛgica de cada g_gameState
+		// Muda para a l√≥gica de cada g_gameState
 		switch ( g_gameState )
 		{
-			case 1:
+			case STATE_TITLE_SCREEN:
 				title_screen_logic();
 				break;
 
-			case 2: 
+			case STATE_MAIN_MENU: 
 				main_menu_logic(); 
 				break; 
 
-			case 3: 
+			case STATE_GAMEPLAY:
 				gameplay_logic(); 
 				break;
 
-			case 4: 
-		//		options_logic(); 
+			case STATE_OPTIONS:
+				//options_logic(); 
 				break;
+				
+			case STATE_HIGHSCORE:
+				//highscore_logic();
+				break;
+				
+			case STATE_CREDITS:
+				//credits_logic();		
 
-			case 5: 
-		//		pause_logic(); 
+			case STATE_PAUSE:
+				//pause_logic(); 
 				break; 
 		}
 	}
@@ -339,10 +349,10 @@ int main_menu_logic( int argc, char *argv[] )
 
 	// Area onde a imagem fonte sera aplicada
 	SDL_Rect l_dstRect;	
-	l_dstRect.x = SCREEN_WIDTH/2;
-  	l_dstRect.y = SCREEN_HEIGHT/2;
-   	l_dstRect.w = 100;
-   	l_dstRect.h = 100;
+	l_dstRect.x = 100;
+  	l_dstRect.y = 205;
+   	l_dstRect.w = 35;
+   	l_dstRect.h = 35;
 	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
 
 	SDL_RenderPresent( g_renderer );
@@ -360,22 +370,61 @@ int main_menu_logic( int argc, char *argv[] )
             if( e.type == SDL_KEYDOWN )
     	    {
     	    	load_sfx( "sound_music/wood_coffin_lid_impact.wav" );
-    	    	SDL_Delay( 1000 );
 
                 switch( e.key.keysym.sym )
                 {
                     case SDLK_BACKSPACE:
-                       	g_gameState = 1;
-                       	break;
+                    	g_gameState = 1;
+                    	break;
 
-					case SDLK_RETURN:
-                       	g_gameState = 3;
-                       	break;
+                    case SDLK_UP:
+                    	l_dstRect.x -= 42;
+                    	if ( l_dstRect < 205 )
+                    	{
+                    		l_dstRect.x = 373;
+						}
+                    	free_texture;
+                    	load_Texture( "arrow.png" );
+                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
+                    	SDL_RenderPresent( g_renderer );
+                    	break;
 
-                    //case SDLK_UP:
-
-
-                	//case SDLK_DOWN:
+                	case SDLK_DOWN:
+                		l_dstRect.x += 42;
+                    	if ( l_dstRect > 373 )
+                    	{
+                    		l_dstRect.x = 205;
+						}
+                    	free_texture;
+                    	load_Texture( "arrow.png" );
+                    	SDL_RenderCopy( g_renderer, g_texture, NULL, &l_dstRect );
+                    	SDL_RenderPresent( g_renderer );
+                    	break;
+                    	
+                    case SDLK_RETURN:
+                    	switch( l_dstRect )
+                    	{
+                    		case 205:
+                    			g_gameState = STATE_GAMEPLAY;
+                    			break;
+                    			
+                    		case 247:
+                    			g_gameState = STATE_OPTIONS;
+                    			break;
+                    			
+                    		case 289:
+                    			g_gameState = STATE_HIGHSCORE;
+                    			break;
+                    			
+                    		case 331:
+                    			g_gameState = STATE_CREDITS;
+                    			break;
+                    			
+                    		case 373:
+                    			g_quitGame = 1;
+                    			break;
+						}
+                    	break;
                 }
             }
         }
@@ -410,7 +459,7 @@ int gameplay_logic( int argc, char *argv[] )
    	l_dstRect.w = 80;
    	l_dstRect.h = 80;
 	
-	load_Texture( "pelefinal.png" );
+	load_Texture( "sprites/sombra100-60.png" );
 	SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
 	SDL_RenderPresent( g_renderer );
 
@@ -441,8 +490,7 @@ int gameplay_logic( int argc, char *argv[] )
 						break;
 
 					case SDLK_RETURN:
-						SDL_QUIT;
-						return 0;                                                                     
+                        g_quitGame = 1;                                      
 						break;
            		}
         	}
@@ -452,12 +500,9 @@ int gameplay_logic( int argc, char *argv[] )
 
 int close_game()
 {
+	// Libera texture e qualquer tipo de som
 	free_texture();
 	free_music_sfx( 'b' );
-
-
-
-
 
 	// Destroi a janela
 	SDL_DestroyRenderer( g_renderer );

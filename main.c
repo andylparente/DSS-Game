@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
+#include "loaders_and_effects.h"
 #include "opening.c"
 #include "title_screen.c"
 #include "menu.c"
@@ -232,35 +233,45 @@ void free_texture()
 	// Libera imagem carregada
 	SDL_DestroyTexture( g_texture );
 	g_texture = NULL;
-}
+} */
 
-void load_music( char* l_Path )
+int load_music( char* l_path, SDL_Music* l_music )
 {	
+	int l_quitGame = 0;
+	
 	// Carrega musica
-	g_music = Mix_LoadMUS( l_Path );
-	if( g_music == NULL )
+	l_music = Mix_LoadMUS( l_path );
+	if( l_music == NULL )
     {
-        printf( "Failed to load %s [music]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
+        printf( "Failed to load %s [music]! SDL_mixer Error: %s\n", l_path, Mix_GetError() );
         g_quitGame = 1;
     }
 
     // Reproduz a musica
-    Mix_PlayMusic( g_music, -1 );
+    Mix_PlayMusic( l_music, -1 );
+    
+    return l_quitGame;
 }
 
-void load_sfx( char* l_Path )
+int load_sfx( char* l_path, SDL_Music* l_music )
 {
+	int l_quitGame = 0;
+	
 	// Carrega efeitos sonoros
-    g_sfx = Mix_LoadWAV( l_Path );
-    if( g_sfx == NULL )
+    l_sfx = Mix_LoadWAV( l_path );
+    if( l_sfx == NULL )
     {
-        printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_Path, Mix_GetError() );
-        g_quitGame = 1;
+        printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_path, Mix_GetError() );
+        l_quitGame = 1;
     }
 
     // Reproduz o efeito sonoro
-    Mix_PlayChannel( -1, g_sfx, 0 );
+    Mix_PlayChannel( -1, l_sfx, 0 );
+    
+    return l_quitGame;
 }
+
+/*
 
 void free_music_sfx( char type )
 {

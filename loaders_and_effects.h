@@ -6,18 +6,21 @@
 
 SDL_Texture* load_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer )
 {
-	//Imagem PNG em surface e textura
-	SDL_Surface* l_loadedSurface = NULL;
-	SDL_Texture* l_texture = NULL;
+	// Surface auxiliar e textura que sera utilizada
+	SDL_Surface* l_auxSurface = NULL;
+	SDL_Texture* l_newTexture = NULL;
 
 	// Carrega a imagem de um diretorio
-	l_loadedSurface = IMG_Load( l_path );
+	l_auxSurface = IMG_Load( l_path );
+	
+	// Gera uma textura atraves da surface auxiliar
+	l_newTexture = SDL_CreateTextureFromSurface( l_renderer, l_auxSurface );
 
 	// Se livra da surface que nao sera usada
-	SDL_FreeSurface( l_loadedSurface );
-	l_loadedSurface = NULL;
+	SDL_FreeSurface( l_auxSurface );
+	l_auxSurface = NULL;
 	
-	return l_texture;
+	return l_newTexture;
 }
 
 int fade_in_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer )
@@ -99,7 +102,6 @@ int fade_out_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_render
         printf( "Failed to load %s [music]! SDL_mixer Error: %s\n", l_path, Mix_GetError() );
         l_quitGame = 1;
     }
-
     // Reproduz a musica
     Mix_PlayMusic( l_music, -1 );
     

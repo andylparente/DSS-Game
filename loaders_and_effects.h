@@ -45,11 +45,13 @@ int fade_in_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_rendere
 		SDL_RenderCopy( l_renderer, l_texture, NULL, NULL );
 		SDL_SetRenderDrawColor( l_renderer, 255, 255, 255, 255 );
 		
+		// Apresenta a imagem
+		SDL_RenderPresent( l_renderer );
+		
 		// Opacidade da proxima textura aumenta
-		l_opacity += 2;	
+		l_opacity += 4;	
 		
 		// Limpa a tela 
-		SDL_RenderPresent( l_renderer );
 		SDL_RenderClear( l_renderer );  
 		
 		// Sai do loop para fechar o jogo
@@ -69,18 +71,18 @@ int fade_out_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_render
 	int l_opacity = 255;
 	
 	// Efeito de fade out
-	while( l_opacity > 0)
+	while( l_opacity > 0 )
 	{
-		l_quitGame = load_texture( l_path, l_window, l_renderer );
+		l_texture = load_texture( l_path, l_window, l_renderer );
 		SDL_SetTextureBlendMode( l_texture, SDL_BLENDMODE_BLEND );
 		SDL_SetTextureAlphaMod( l_texture, l_opacity );
 		SDL_RenderCopy( l_renderer, l_texture, NULL, NULL );
 		SDL_SetRenderDrawColor( l_renderer, 255, 255, 255, 255 );
+		SDL_RenderPresent( l_renderer );
 		
 		// Opacidade da proxima textura diminui
-		l_opacity -= 2;	
+		l_opacity -= 4;	
 		
-		SDL_RenderPresent( l_renderer );
 		SDL_RenderClear( l_renderer );
 		if( l_texture == NULL )
 		{

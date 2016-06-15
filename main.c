@@ -23,7 +23,7 @@ int STATE_OPTIONS = 6;
 int STATE_PAUSE = 7;
 
 // Iniciliza o estado do jogo como tela inicial
-int g_gameState = 0;
+int g_gameState = 2;
 
 // A janela do jogo
 SDL_Window* g_window = NULL;
@@ -140,17 +140,17 @@ int main( int argc, char *argv[] )
 				g_gameState = gameplay_logic( g_window, g_renderer ); 
 				break;
 
-			case 4:
+			case 6:
 				//options_logic( g_window, g_renderer ); 
 				g_gameState = -1;
 				break;
 				
-			case 5:
+			case 4:
 				//highscore_logic( g_window, g_renderer );
 				g_gameState = -1;
 				break;
 				
-			case 6:
+			case 5:
 				//credits_logic( g_window, g_renderer );
 				g_gameState = -1;
 				break;		

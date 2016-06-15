@@ -10,6 +10,13 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Estado de jogo selecionado
 	int l_gameState = 2;
 	
+    // Area onde a imagem fonte sera aplicada
+    SDL_Rect l_dstRect; 
+    l_dstRect.x = 100;
+    l_dstRect.y = 205;
+    l_dstRect.w = 35;
+    l_dstRect.h = 35;
+
 	// Texturas que serao usadas
 	SDL_Texture* l_textureMenu = NULL;
 	SDL_Texture* l_textureArrow = NULL;
@@ -27,45 +34,51 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
         printf( "Failed to load [images/non_sprites/main_menu.png]! SDL_image Error: %s\n", IMG_GetError() );
         l_gameState = -1;
     }
-	SDL_RenderCopy( l_renderer, l_textureMenu, NULL, NULL );
 
-	// Carrega a imagem da seta
-	l_textureArrow = load_texture( "images/non_sprites/arrow.png", l_window, l_renderer );
-    if( l_textureArrow == NULL )
-    {
-        printf( "Failed to load [images/non_sprites/arrow.png]! SDL_image Error: %s\n", IMG_GetError() );
-        l_gameState = -1;
-    }
+    else
+    {    
+    	SDL_RenderCopy( l_renderer, l_textureMenu, NULL, NULL );
 
-	// Area onde a imagem fonte sera aplicada
-	SDL_Rect l_dstRect;	
-	l_dstRect.x = 100;
-	l_dstRect.y = 205;
-	l_dstRect.w = 35;
-	l_dstRect.h = 35;
-	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_dstRect );
+    	// Carrega a imagem da seta
+    	l_textureArrow = load_texture( "images/non_sprites/arrow.png", l_window, l_renderer );
+        if( l_textureArrow == NULL )
+        {
+            printf( "Failed to load [images/non_sprites/arrow.png]! SDL_image Error: %s\n", IMG_GetError() );
+            l_gameState = -1;
+        }
 
-    // Apresenta as imagens
-	SDL_RenderPresent( l_renderer );
+        else
+        {
+        	// Area onde a imagem fonte sera aplicada
+        	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_dstRect );
 
-	// Carrega musica do menu principal
-    l_music = Mix_LoadMUS( "sound_music/mp3/music/suspended.mp3" );
-    if( l_music == NULL )
-    {
-        printf( "Failed to load [sound_music/mp3/music/suspended.mp3]! SDL_mixer Error: %s\n", Mix_GetError() );
-        l_gameState = -1;
-    }
+            // Apresenta as imagens
+        	SDL_RenderPresent( l_renderer );
 
-    // Reproduz a musica
-    Mix_PlayMusic( l_music, -1 );
+        	// Carrega musica do menu principal
+            l_music = Mix_LoadMUS( "sound_music/mp3/music/suspended.mp3" );
+            if( l_music == NULL )
+            {
+                printf( "Failed to load [sound_music/mp3/music/suspended.mp3]! SDL_mixer Error: %s\n", Mix_GetError() );
+                l_gameState = -1;
+            }
 
-    // Carrega efeito sonoro
-    load_sfx( "sound_music/wav/wood_coffin_lid_impact.wav" );
-    if( l_sfx == NULL )
-    {
-        l_gameState = -1;
+            else
+            {
+                // Reproduz a musica
+                Mix_PlayMusic( l_music, -1 );
+
+                // Carrega efeito sonoros
+                l_sfx = load_sfx( "sound_music/wav/wood_coffin_lid_impact.wav" );
+                if( l_sfx == NULL )
+                {
+                    l_gameState = -1;
+                }
+            }
+        }
     }
     
+    // Cuidador de eventos
     SDL_Event e;
     
     // Navega pelo menu e muda o g_gameState

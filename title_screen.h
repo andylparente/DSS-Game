@@ -49,12 +49,12 @@ int title_screen_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				// Apresenta a imagem com a opacidade normal
 				SDL_RenderCopy( l_renderer, l_texture, NULL, NULL );
 				SDL_RenderPresent( l_renderer );
-				
-				// Flag de evento
-				SDL_Event e;
 			}
 		}
 	}
+
+	// Flag de evento
+	SDL_Event e;
 	
 	while( l_gameState == 1 )
 	{

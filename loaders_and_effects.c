@@ -117,8 +117,7 @@ Mix_Chunk* load_sfx( char* l_path )
     l_sfx = Mix_LoadWAV( l_path );
     if( l_sfx == NULL )
     {
-        printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_path, Mix_GetError() );
+       printf( "Failed to load %s [sfx]! SDL_mixer Error: %s\n", l_path, Mix_GetError() );
     }
-    
     return l_sfx;
 }

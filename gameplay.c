@@ -37,7 +37,7 @@ typedef struct _shooter
 	int damage;
 	
 	// Tipo de projetil que o personagem atira
-	MagicProjectile type;
+	//MagicProjectile type;
 } Shooter;
 
 /*
@@ -162,7 +162,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		 
 	SDL_RenderCopy( l_renderer, firstMap.texture, NULL, NULL );
 	SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );
-	SDL_RenderCopy( l_renderer, skeleton.sprite, &skeleton.snipRect, &skeleton.presentedRect );
+	//SDL_RenderCopy( l_renderer, skeleton.sprite, &skeleton.snipRect, &skeleton.presentedRect );
 	SDL_RenderPresent( l_renderer );    
 	
 	// Cuidador de evento
@@ -200,7 +200,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			{
 				// Definindo teclas com o scancode
 				keyWIsDown = keystates[SDL_SCANCODE_W];
-				keySIsDown = keystates[SDL_SCANCODE_S;
+				keySIsDown = keystates[SDL_SCANCODE_S];
 				keyAIsDown = keystates[SDL_SCANCODE_A];
 				keyDIsDown = keystates[SDL_SCANCODE_D];
 

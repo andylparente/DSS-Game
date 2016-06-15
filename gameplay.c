@@ -184,7 +184,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 	while( l_gameState == 3 )
 	{
-
 		while( SDL_PollEvent( &e ) != 0 )
 		{
 			if( e.type == SDL_QUIT )

@@ -12,9 +12,6 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;	
 
-// Flag para sair do jogo
-int g_quitGame = 0;	
-
 // Cria os estados do jogo
 int STATE_OPENING = 0;
 int STATE_TITLE_SCREEN = 1;
@@ -26,7 +23,7 @@ int STATE_OPTIONS = 6;
 int STATE_PAUSE = 7;
 
 // Iniciliza o estado do jogo como tela inicial
-int g_gameState = 3;
+int g_gameState = 0;
 
 // A janela do jogo
 SDL_Window* g_window = NULL;
@@ -53,7 +50,7 @@ void init_boot_game()
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		
 		// Fechará o jogo ao passar pelo loop principal
-		g_quitGame = 1;
+		g_gameState = 666;
 	}
 	
 	else
@@ -63,7 +60,7 @@ void init_boot_game()
 		if( g_window == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-			g_quitGame = 1;
+			g_gameState = 666;
 		}
 		
 		else
@@ -73,7 +70,7 @@ void init_boot_game()
 			if( g_renderer == NULL )
 			{
 				printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-				g_quitGame = 1;
+				g_gameState = 666;
 			}
 			
 			else
@@ -86,7 +83,7 @@ void init_boot_game()
 				if( !( IMG_Init( imgFlags ) & imgFlags ) )
 				{
 					printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
-					g_quitGame = 1;
+					g_gameState = 666;
 				}
 				
 				else
@@ -95,7 +92,7 @@ void init_boot_game()
 	                if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
 	                {
 	                    printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
-	                    g_quitGame = 1;
+	                    g_gameState = 666;
 	                }
 	        	}
 			}
@@ -112,7 +109,7 @@ int main( int argc, char *argv[] )
 	SDL_Event e;
 
 	// Enquanto a aplicação esta rodando
-	while( g_quitGame != 1 )
+	while( g_gameState != 666 )
 	{
 		// Cuida dos eventos na fila
 		while( SDL_PollEvent( &e ) != 0 )
@@ -120,7 +117,7 @@ int main( int argc, char *argv[] )
 			// Usuario deseja sair
 			if( e.type == SDL_QUIT )
 			{
-				g_quitGame = 1;
+				g_gameState = -1;
 			}
 		}
 
@@ -128,13 +125,11 @@ int main( int argc, char *argv[] )
 		switch ( g_gameState )
 		{
 			case 0:
-				g_quitGame = opening_logic( g_window, g_renderer );
-				g_gameState = 1;
+				g_gameState = opening_logic( g_window, g_renderer );
 				break;
 	
 			case 1:
-				g_quitGame = title_screen_logic( g_window, g_renderer );
-				g_gameState = 2;
+				g_gameState = title_screen_logic( g_window, g_renderer );
 				break;
 
 			case 2: 
@@ -142,32 +137,31 @@ int main( int argc, char *argv[] )
 				break; 
 
 			case 3:
-				g_gameState = gameplay_logic(); 
-				g_quitGame = 1;
+				g_gameState = gameplay_logic( g_window, g_renderer ); 
 				break;
 
 			case 4:
-				//options_logic(); 
-				g_quitGame = 1;
+				//options_logic( g_window, g_renderer ); 
+				g_gameState = -1;
 				break;
 				
 			case 5:
-				//highscore_logic();
-				g_quitGame = 1;
+				//highscore_logic( g_window, g_renderer );
+				g_gameState = -1;
 				break;
 				
 			case 6:
-				//credits_logic();
-				g_quitGame = 1;
+				//credits_logic( g_window, g_renderer );
+				g_gameState = -1;
 				break;		
 
 			case 7:
-				//pause_logic();
-				g_quitGame = 1; 
+				//pause_logic( g_window, g_renderer );
+				g_gameState = -1;
 				break;
 
 			default:
-				g_quitGame = 1;
+				g_gameState = 666;
 				break; 
 		}
 	}

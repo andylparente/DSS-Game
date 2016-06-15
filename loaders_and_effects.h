@@ -23,11 +23,8 @@ SDL_Texture* load_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_r
 	return l_newTexture;
 }
 
-int fade_in_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer )
-{
-	// Flag para fechar o jogo
-	int l_quitGame = 0;
-	
+int fade_in_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer, int l_gameState )
+{	
 	// Imagem PNG em textura
 	SDL_Texture* l_texture = NULL;
 	
@@ -57,16 +54,16 @@ int fade_in_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_rendere
 		// Sai do loop para fechar o jogo
 		if( l_texture == NULL )
 		{
-			l_quitGame = 1;
+			l_gameState = -1;
+			printf( "Failed to load and fade in texture [%s]!", l_path ); 
 			break;
 		}
 	}
-	return l_quitGame;
+	return l_gameState;
 }
 
-int fade_out_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer )
+int fade_out_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_renderer, int l_gameState )
 {
-	int l_quitGame = 0;
 	SDL_Texture* l_texture = NULL;
 	int l_opacity = 255;
 	
@@ -86,11 +83,12 @@ int fade_out_texture( char* l_path, SDL_Window* l_window, SDL_Renderer* l_render
 		SDL_RenderClear( l_renderer );
 		if( l_texture == NULL )
 		{
-			l_quitGame = 1;
+			l_gameState = -1;
+			printf( "Failed to load and fade out texture [%s]!", l_path ); 
 			break;
 		}   
 	}
-	return l_quitGame;
+	return l_gameState;
 }
 
 /*int load_music( char* l_path, SDL_Music* l_music )

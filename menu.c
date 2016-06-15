@@ -24,7 +24,7 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	l_textureMenu = load_texture( "images/non_sprites/main_menu.png", l_window, l_renderer );
     if( l_textureMenu == NULL )
     {
-        printf( "Failed to load [images/non_sprites/main_menu.png]! SDL_mixer Error: %s\n", IMG_GetError() );
+        printf( "Failed to load [images/non_sprites/main_menu.png]! SDL_image Error: %s\n", IMG_GetError() );
         l_gameState = -1;
     }
 	SDL_RenderCopy( l_renderer, l_textureMenu, NULL, NULL );
@@ -33,7 +33,7 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	l_textureArrow = load_texture( "images/non_sprites/arrow.png", l_window, l_renderer );
     if( l_textureArrow == NULL )
     {
-        printf( "Failed to load [images/non_sprites/arrow.png]! SDL_mixer Error: %s\n", IMG_GetError() );
+        printf( "Failed to load [images/non_sprites/arrow.png]! SDL_image Error: %s\n", IMG_GetError() );
         l_gameState = -1;
     }
 

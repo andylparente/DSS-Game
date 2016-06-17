@@ -293,7 +293,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
     		
     		else
 			{
-    			player.snipRect.x += 80;
+    			player.snipRect.x += 100;
     			if( player.snipRect.x < 400 || player.snipRect.x >700 )
     			{
     				player.snipRect.x = 400;

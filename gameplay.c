@@ -4,8 +4,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include "loaders_and_effects.h"
-/*
-typedef struct _melee_damager
+
+typedef struct _inimigo
 {
 	// Textura que contera o sprite e informaces da textura
 	SDL_Texture* sprite;
@@ -16,12 +16,12 @@ typedef struct _melee_damager
 	Mix_Chunk* gotHit;
 	Mix_Chunk* deathSound;
 	
-	// Pontos de vida, velocidade com que se move e dano causado por contato fisico
+	// Se esta aparecendo na tela, pontos de vida, velocidade com que se move e dano causado por contato fisico
+	int activate;
 	int healthPoints;
 	float speed;
 	int damage;
-} MeleeDamager;
-*/
+} Inimigo;
 
 typedef struct _shooter
 {
@@ -37,16 +37,20 @@ typedef struct _shooter
 	int damage;
 	
 	// Tipo de projetil que o personagem atira
-	MagicProjectile type;
+	//MagicProjectile type;
 } Shooter;
 
-/*
 typedef struct _magic_projectile
 {
 	SDL_Texture* sprite;
 	SDL_Rect snipRect;
 	SDL_Rect presentedRect;
 	
+	int activate;
+
+	// Direcao do projetil
+	int direction;
+
 	// Efeitos sonoros quando uma parede e acertada e quando um personagem e acertado
 	Mix_Chunk* hitWall;
 	Mix_Chunk* hitCharacter;
@@ -54,6 +58,7 @@ typedef struct _magic_projectile
 	int damage;
 	float speed;
 } MagicProjectile;
+
 
 
 typedef struct _item
@@ -73,9 +78,9 @@ typedef struct _collectible
 	SDL_Rect snipRect;
 	SDL_Rect presentedRect;
 	
-	Mix_Chunk* collectedSound
+	Mix_Chunk* collectedSound;
 } Collectible;
-*/
+
 
 typedef struct _map
 {
@@ -84,19 +89,24 @@ typedef struct _map
 	SDL_Rect snipRect;
 } Map;
 
-
+void chasing( Inimigo* enemy, Inimigo type, Shooter player );
 
 int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 {
+	// Contadores (preguica de colocar l_ para essas variaveis locais)
+	int i = 0;
+	int i2 = 0;
+	int a = 0;
+
 	// Flag para trocar o estado do jogo
 	int l_gameState= 3;
 	
 	// Personagens que atiram coisas (inclui o jogador)
-	Shooter player;	
+	Shooter player;
 	//Shooter beholder;
 	//Shooter necromancer;
 	//Shooter demonBoss;
-/*
+
 	// Tipos de projeteis/tiros
 	//MagicProjectile arcaneMissile;
 	MagicProjectile fireBall;
@@ -106,8 +116,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//MagicProjectile demonicBolt;
 
 	// Personagens que causam dano somente atraves do toque
-	MeleeDamager skeleton;
-	//MeleeDamager gatekeeper;
+	Inimigo skeleton;
+	//Inimigo gatekeeper;
 	
 	// Itens que modificam o jogador
 	//Item blueRobe;
@@ -115,10 +125,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//Item greenRobe;
 	
 	// Tipos de colecionaveis (geram score)
-	Collectible greenCrystal;
+	//Collectible greenCrystal;
 	//Collectible blueCrystal;
 	//Collectible redCrystal;
-*/	
+
+	
 	// Mapas do jogo
 	Map firstMap;
 	//Map lastMap;
@@ -138,169 +149,291 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//player.healthPoints = 100;
 	player.speed = 5.0;
 	//player.damage = 0;
-/*	
+
+
+	// Quantidade de tiros
+	//MagicProjectile arcaneMissileV[50];
+	MagicProjectile fireBallV[50];
+	//MagicProjectile iceSpearV[50];
+
+	// Definindo info do vetor de fireBalls 
+	for( a = 0 ; a < 50 ; a++ )
+	{
+	
+	fireBallV[a].snipRect.x = 0;
+	fireBallV[a].snipRect.y = 0;
+	fireBallV[a].snipRect.h = 30;
+	fireBallV[a].snipRect.w = 30;
+	fireBallV[a].presentedRect.x = 900;
+	fireBallV[a].presentedRect.y = 900; 
+	fireBallV[a].presentedRect.w = 30;
+	fireBallV[a].presentedRect.h = 30; 
+	
+	}
+
 	// Informacoes do projetil
 	fireBall.sprite = load_texture( "images/sprites/fireball30x30.png", l_window, l_renderer );
 	//fireBall.hitWall = load_sfx( "?" );
 	//fireBall.hitCharacter = load_sfx( "?" );
 	fireBall.damage = 50;
+	fireBall.speed = 2.0;
 	
 	//  Informacoes do inimigo
 	skeleton.sprite = load_texture( "images/sprites/esqueleto_80x80.png", l_window, l_renderer );
 	//skeleton.gotHit = load_sfx( "?" );
 	//skeleton.deathSound = load_sfx( "?" );
 	skeleton.healthPoints = 100;
-	skeleton.speed = 3.5;
+	skeleton.speed = 1.5;
 	skeleton.damage = 30;
 	
+	//quantidade de inimigos
+	Inimigo skeletonV[5];
+
+	for( a = 0 ; a < 5 ; a++ )
+	{
+		skeletonV[a].snipRect.x = 0;
+		skeletonV[a].snipRect.y = 0;
+		skeletonV[a].snipRect.h = 80;
+		skeletonV[a].snipRect.w = 80;
+		skeletonV[a].presentedRect.x = 0;
+		skeletonV[a].presentedRect.y = (0 + a*100); 
+		skeletonV[a].presentedRect.w = 80;
+		skeletonV[a].presentedRect.h = 80; 
+		skeletonV[a].activate = 0;
+	}
+
 	// Informacoes do colecionavel
-	greenCrystal.sprite = load_texture( "images/sprites/green_crystal.png", l_window, l_renderer );
+	//greenCrystal.sprite = load_texture( "images/sprites/green_crystal.png", l_window, l_renderer );
 	//greenCrystal.collectedSound = load_sfx( "?" );
-*/	
+	
 	// Informacoes sobre o mapa
 	firstMap.texture = load_texture( "images/levels/4_doors.png", l_window, l_renderer );
-		 
+
+
 	SDL_RenderCopy( l_renderer, firstMap.texture, NULL, NULL );
 	SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );
-	SDL_RenderCopy( l_renderer, skeleton.sprite, &skeleton.snipRect, &skeleton.presentedRect );
+	//SDL_RenderCopy( l_renderer, skeleton.sprite, &skeleton.snipRect, &skeleton.presentedRect );
 	SDL_RenderPresent( l_renderer );    
 	
 	// Cuidador de evento
     SDL_Event e;
     
 	const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-/*
-	// Definindo teclas para atirar
-	int keyUpIsDown;
-	int keyDownIsDown;
-	int keyLeftIsDown;
-	int keyRightIsDown;
-*/
-	// Definindo teclas para movimentar-se	
-	int keyWIsDown;
-	int keySIsDown;
-	int keyAIsDown;
-	int keyDIsDown;
+
+	// Velocidade x e y do player
+	float velx = player.speed;
+	float vely = player.speed;
 
 	while( l_gameState == 3 )
 	{
+		SDL_RenderClear( l_renderer );		
+		SDL_RenderCopy( l_renderer, firstMap.texture, NULL, NULL );
+		SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );
+        	
+        // Onde o projetil sera mostrado na tela
+       	for( a = 0 ; a < 50 ; a++ )
+		{	
+			if( fireBallV[a].presentedRect.y <= 0 || fireBallV[a].presentedRect.x <= 0 || fireBallV[a].presentedRect.x > 800 || fireBallV[a].presentedRect.y > 800 )
+			{
+				fireBallV[a].activate = 0;
+			}
 
+			if( fireBallV[a].activate == 1 )
+			{
+				switch( fireBallV[a].direction )
+				{
+					case 1:
+						fireBallV[a].presentedRect.y -= fireBall.speed;
+						break;
+
+					case 2:
+						fireBallV[a].presentedRect.y += fireBall.speed;
+						break;
+
+					case 3:
+						fireBallV[a].presentedRect.x -= fireBall.speed;
+						break;
+
+					case 4:
+						fireBallV[a].presentedRect.x += fireBall.speed;
+						break;
+				}
+
+				SDL_RenderCopy( l_renderer, fireBall.sprite, &fireBallV[a].snipRect, &fireBallV[a].presentedRect );
+			}
+		}
+
+        // Onde o inimigo aparecera na tela
+        for( a = 0 ; a < 5 ; a++ )
+        {
+           	if ( skeletonV[a].activate == 1 )
+           	{
+				chasing( &skeletonV[a], skeleton, player );
+
+				for ( i2 = 0 ; i2 < 50 ; i2++ )
+				{
+					if( fireBallV[i2].presentedRect.x == skeletonV[a].presentedRect.x && fireBallV[i2].presentedRect.y == skeletonV[a].presentedRect.y )
+					{
+						skeletonV[a].activate = 0;
+					}
+				}
+
+				SDL_RenderCopy( l_renderer, skeleton.sprite, &skeletonV[a].snipRect, &skeletonV[a].presentedRect );
+			}							
+        }
+
+        // Tudo e mostrado
+        SDL_RenderPresent( l_renderer );
+
+        // Lista de eventos
 		while( SDL_PollEvent( &e ) != 0 )
 		{
-			if( e.type == SDL_QUIT )
-            {
-                l_gameState = -1;
-            }
-
-	    	SDL_RenderClear( l_renderer );		
-			SDL_RenderCopy( l_renderer, firstMap.texture, NULL, NULL );
-			SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );
-        	SDL_RenderPresent( l_renderer );
-       	
-    		if( e.type == SDL_KEYDOWN )
+        	switch( e.type )
 			{
-				// Definindo teclas com o scancode
-				keyWIsDown = keystates[SDL_SCANCODE_W];
-				keySIsDown = keystates[SDL_SCANCODE_S;
-				keyAIsDown = keystates[SDL_SCANCODE_A];
-				keyDIsDown = keystates[SDL_SCANCODE_D];
-
-				if( keyWIsDown && keyDIsDown )
-				{
-					player.presentedRect.x += player.speed;
-					player.presentedRect.y -= player.speed;
-					player.snipRect.x -= 100;
-					if( player.snipRect.x < 200 || player.snipRect.x > 300 )
-	    			{
-	    				player.snipRect.x = 200;
-					}
-				} 
-				else if( keyWIsDown && keyAIsDown )
-				{
-					player.presentedRect.x -= player.speed;
-					player.presentedRect.y -= player.speed;
-					player.snipRect.x -= 100;
-					if( player.snipRect.x < 200 || player.snipRect.x > 300 )
-	    			{
-	    				player.snipRect.x = 200;
-					}
-				}
-				else if( keySIsDown && keyDIsDown )
-				{
-					player.presentedRect.x += player.speed;
-					player.presentedRect.y += player.speed;
-					player.snipRect.x += 100;
-					if( player.snipRect.x < 0 || player.snipRect.x > 100 )
-	    			{
-	    				player.snipRect.x = 0;
-					}
-				}
-				else if( keySIsDown && keyAIsDown )
-				{
-					player.presentedRect.x -= player.speed;
-					player.presentedRect.y += player.speed;
-					player.snipRect.x += 100;
-					if( player.snipRect.x < 0 || player.snipRect.x > 100 )
-	    			{
-	    				player.snipRect.x = 0;
-					}
-				}
-				else
-				{
-           			switch( e.key.keysym.sym )
-        			{
+				case SDL_QUIT:
+		            l_gameState = -1;
+		            break;
+				
+				// Pressionou uma tecla
+		  		case SDL_KEYDOWN:
+		   			switch( e.key.keysym.sym )
+		   			{
 						case SDLK_d:	
-        					player.presentedRect.x += player.speed;
-        					player.snipRect.x += 100;
-        					if( player.snipRect.x < 1400 || player.snipRect.x > 1500 )
+		   					velx = 5.0;
+		  					player.snipRect.x += 100;
+		   					if( player.snipRect.x < 1400 || player.snipRect.x > 1500 )
 			    			{
 			    				player.snipRect.x = 1400;
 							}
 							break;
-	
+				
 						case SDLK_a: 
-							player.presentedRect.x -= player.speed;
+			   				velx = -5.0;
 							player.snipRect.x -= 100;
 							if( player.snipRect.x < 1800 || player.snipRect.x > 1900 )
-			    			{
-			    				player.snipRect.x = 1800;
+				   			{
+				   				player.snipRect.x = 1800;
 							}
 							break;
-	
+				
 						case SDLK_w:
-							player.presentedRect.y -= player.speed;
+			   				vely = -5.0;
 							player.snipRect.x -= 100;
 							if( player.snipRect.x < 200 || player.snipRect.x > 300 )
-			    			{
-			    				player.snipRect.x = 200;
+				   			{
+				   				player.snipRect.x = 200;
 							}
 							break;
-	
+				
 						case SDLK_s:
-							player.presentedRect.y += player.speed;
+			   				vely = 5.0;
 							player.snipRect.x += 100;
 							if( player.snipRect.x < 0 || player.snipRect.x > 100 )
-			    			{
-			    				player.snipRect.x = 0;
+				   			{	
+				   				player.snipRect.x = 0;
 							}
 							break;
-	
+				
 						case SDLK_RETURN:
-							g_gameState = -1;                                     
+							for( a = 0 ; a < 5 ; a++ )
+							{
+								skeletonV[a].activate = 1;
+							}                                  
 							break;
-        			}
-    			}	
-    		}
-    		
-    		else
-			{
-    			player.snipRect.x += 80;
-    			if( player.snipRect.x < 400 || player.snipRect.x >700 )
-    			{
-    				player.snipRect.x = 400;
-				}
+
+						case SDLK_UP:
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 1;
+							fireBallV[i].activate = 1;
+
+							i++;
+
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							break;
+
+						case SDLK_DOWN:
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 2;
+							fireBallV[i].activate = 1;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							break;
+
+						case SDLK_LEFT:
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 3;
+							fireBallV[i].activate = 1;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							break;
+
+						case SDLK_RIGHT:
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 4;
+							fireBallV[i].activate = 1;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							break;
+		        	}
+		        	break;
+
+		        // Soltou uma tecla
+			    case SDL_KEYUP:
+			    	switch( e.key.keysym.sym )
+			        {
+						case SDLK_d:	
+			        		velx = 0.0;
+							break;
+				
+						case SDLK_a: 
+							velx = 0.0;
+							break;
+				
+						case SDLK_w:
+							vely = 0.0;
+							break;
+				
+						case SDLK_s:
+							vely = 0.0;
+							break;
+				
+						default:                                  
+							break;
+			        }
+			        break;
+			    
+			    // Moveu o mouse		
+			    case SDL_MOUSEMOTION:
+			    	break;
+
+			    // Fez nada
+			    default:
+					player.snipRect.x += 100;
+					if( player.snipRect.x < 400 || player.snipRect.x >700 )
+					{
+						player.snipRect.x = 400;
+					}
+					break;
 			}
-    	}
+			player.presentedRect.x += velx;
+			player.presentedRect.y += vely;   
+		}
 	}
 	
 	// Libera imagens carregadas
@@ -315,81 +448,22 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	return l_gameState;
 }
 
-int chaser( MeleeDamager character, Shooter player )
-{	
-	// Caso precise ir para cima
-	if( character.presentedRect.y > player.presentedRect.y )
+void chasing( Inimigo* enemy, Inimigo type, Shooter player )
+{
+	if( player.presentedRect.x > enemy->presentedRect.x )
 	{
-		// Modifica a posicao que ele surgira na tela
-		character.presentedRect.y -= character.speed;
-		
-		// Modifica a posicao que ele surgira na tela(caso tambem esteja indo para esquerda)
-		if( character.presentedRect.x > player.presentedRect.x )
-		{
-			character.presentedRect.x -= character.speed;
-		}
-		
-		// Modifica a posicao que ele surgira na tela(caso tambem esteja indo para direita)
-		else if( character.presentedRect.x < player.presentedRect.x )
-		{
-		character.presentedRect.x += character.speed;
-		}
-		
-		// Muda o sprite usado
-		character.snipRect += 80;
-		
-		// Certifica que o sprite usado e o correto
-		if( character.snipRect < 240 || character.snipRect > 400 )
-		{
-			character.snipRect = 240;
-		}
+		enemy->presentedRect.x += type.speed;
 	}
-	
-	// Caso precise ir para baixo
-	else if( character.presentedRect.y < player.presentedRect.y )
+	if( player.presentedRect.x < enemy->presentedRect.x )
 	{
-		character.presentedRect.y += character.speed;
-		if( character.presentedRect.x > player.presentedRect.x )
-		{
-			character.presentedRect.x -= character.speed;
-		}
-		else if( character.presentedRect.x < player.presentedRect.x )
-		{
-		character.presentedRect.x += character.speed;
-		}
-		character.snipRect += 80;
-		if( character.snipRect < 0 || character.snipRect > 160 )
-		{
-			character.snipRect = 0;
-		}
+		enemy->presentedRect.x -= type.speed;
 	}
-	
-	// Caso precise ir para esquerda
-	else if( character.presentedRect.x > player.presentedRect.x )
+	if( player.presentedRect.y > enemy->presentedRect.y )
 	{
-		character.presentedRect.x -= character.speed;
-		character.snipRect += 80;
-		if( character.snipRect < 720 || character.snipRect > 880 )
-		{
-			character.snipRect = 720;
-		}
+		enemy->presentedRect.y += type.speed;
 	}
-	
-	// Caso precise ir para direita
-	else if( character.presentedRect.x < player.presentedRect.x )
+	if( player.presentedRect.y < enemy->presentedRect.y )
 	{
-		character.presentedRect.x += character.speed;
-		character.snipRect += 80;
-		if( character.snipRect < 480 || character.snipRect > 640 )
-		{
-			character.snipRect = 480;
-		}
+		enemy->presentedRect.y -= type.speed;
 	}
-
-	// Definindo hitbox
-	if( character.presentedRect.x > player.presentedRect.x + 12 && character.presentedRect.x < player.presentedRect.x + 87 && character.presentedRect.y > player.presentedRect.y && character.presentedRect.y < player.presentedRect.y + 58 )
-	{
-		player.healthPoints -= character.damage;
-	}	
-
 }

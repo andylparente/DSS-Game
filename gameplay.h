@@ -5,7 +5,7 @@
 #include <SDL2/SDL_mixer.h>
 #include "loaders_and_effects.h"
 
-typedef struct _inimigo
+typedef struct _character
 {
 	// Textura que contera o sprite e informaces da textura
 	SDL_Texture* sprite;
@@ -21,8 +21,13 @@ typedef struct _inimigo
 	int healthPoints;
 	float speed;
 	int damage;
-} Inimigo;
 
+	// Tipo de projetil que o personagem atira
+	//MagicProjectile type;
+
+} Character;
+
+/*
 typedef struct _shooter
 {
 	SDL_Texture* sprite;
@@ -38,7 +43,7 @@ typedef struct _shooter
 	
 	// Tipo de projetil que o personagem atira
 	//MagicProjectile type;
-} Shooter;
+} Shooter; */
 
 typedef struct _magic_projectile
 {
@@ -89,7 +94,7 @@ typedef struct _map
 	SDL_Rect snipRect;
 } Map;
 
-void chasing( Inimigo* enemy, Inimigo type, Shooter player );
+void chasing( Character* enemy, Character typeOfEnemy, Character player );
 
 int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 {
@@ -102,10 +107,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	int l_gameState= 3;
 	
 	// Personagens que atiram coisas (inclui o jogador)
-	Shooter player;
-	//Shooter beholder;
-	//Shooter necromancer;
-	//Shooter demonBoss;
+	Character player;
+	//Character beholder;
+	//Character necromancer;
+	//Character demonBoss;
 
 	// Tipos de projeteis/tiros
 	//MagicProjectile arcaneMissile;
@@ -116,8 +121,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//MagicProjectile demonicBolt;
 
 	// Personagens que causam dano somente atraves do toque
-	Inimigo skeleton;
-	//Inimigo gatekeeper;
+	Character skeleton;
+	//Character gatekeeper;
 	
 	// Itens que modificam o jogador
 	//Item blueRobe;
@@ -187,7 +192,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	skeleton.damage = 30;
 	
 	//quantidade de inimigos
-	Inimigo skeletonV[5];
+	Character skeletonV[5];
 
 	for( a = 0 ; a < 5 ; a++ )
 	{
@@ -272,10 +277,70 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( fireBallV[i2].presentedRect.x == skeletonV[a].presentedRect.x && fireBallV[i2].presentedRect.y == skeletonV[a].presentedRect.y )
+					// A GRANDE HITBOX TESTE 1
+					if(	(	 // Atingindo canto superior esquerdo
+							(	
+								((fireBallV[i2].presentedRect.x+fireBallV[i2].presentedRect.w) < (skeletonV[a].presentedRect.x+skeletonV[a].presentedRect.w)) 
+								&& 
+						    	((fireBallV[i2].presentedRect.x+fireBallV[i2].presentedRect.w) > skeletonV[a].presentedRect.x) 
+						    ) 
+						    	&&
+							(	
+								((fireBallV[i2].presentedRect.y+fireBallV[i2].presentedRect.h) < (skeletonV[a].presentedRect.y+skeletonV[a].presentedRect.h))
+								&&
+								((fireBallV[i2].presentedRect.y+fireBallV[i2].presentedRect.h) > skeletonV[a].presentedRect.y)
+							)
+
+						)
+						||
+						(	 // Atingindo canto superior direto
+							(	
+								((fireBallV[i2].presentedRect.x) < (skeletonV[a].presentedRect.x+skeletonV[a].presentedRect.w)) 
+								&& 
+						    	((fireBallV[i2].presentedRect.x) > skeletonV[a].presentedRect.x) 
+						    ) 
+						    	&&
+							(	
+								((fireBallV[i2].presentedRect.y+fireBallV[i2].presentedRect.h) < (skeletonV[a].presentedRect.y+skeletonV[a].presentedRect.h))
+								&&
+								((fireBallV[i2].presentedRect.y+fireBallV[i2].presentedRect.h) > skeletonV[a].presentedRect.y)
+							)
+
+						)
+						||
+						(	 // Atingindo canto inferior esquerdo
+							(	
+								((fireBallV[i2].presentedRect.x+fireBallV[i2].presentedRect.w) < (skeletonV[a].presentedRect.x+skeletonV[a].presentedRect.w)) 
+								&& 
+						    	((fireBallV[i2].presentedRect.x+fireBallV[i2].presentedRect.w) > skeletonV[a].presentedRect.x) 
+						    ) 
+						    	&&
+							(	
+								((fireBallV[i2].presentedRect.y) < (skeletonV[a].presentedRect.y+skeletonV[a].presentedRect.h))
+								&&
+								((fireBallV[i2].presentedRect.y) > skeletonV[a].presentedRect.y)
+							)
+
+						)
+						||
+						(	 // Atingindo canto inferior direito
+							(	
+								((fireBallV[i2].presentedRect.x) < (skeletonV[a].presentedRect.x+skeletonV[a].presentedRect.w)) 
+								&& 
+						    	((fireBallV[i2].presentedRect.x) > skeletonV[a].presentedRect.x) 
+						    ) 
+						    	&&
+							(	
+								((fireBallV[i2].presentedRect.y) < (skeletonV[a].presentedRect.y+skeletonV[a].presentedRect.h))
+								&&
+								((fireBallV[i2].presentedRect.y) > skeletonV[a].presentedRect.y)
+							)
+
+						)
+					)
 					{
 						skeletonV[a].activate = 0;
-					}
+					}				
 				}
 
 				SDL_RenderCopy( l_renderer, skeleton.sprite, &skeletonV[a].snipRect, &skeletonV[a].presentedRect );
@@ -448,22 +513,22 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	return l_gameState;
 }
 
-void chasing( Inimigo* enemy, Inimigo type, Shooter player )
+void chasing( Character* enemy, Character typeOfEnemy, Character player )
 {
 	if( player.presentedRect.x > enemy->presentedRect.x )
 	{
-		enemy->presentedRect.x += type.speed;
+		enemy->presentedRect.x += typeOfEnemy.speed;
 	}
 	if( player.presentedRect.x < enemy->presentedRect.x )
 	{
-		enemy->presentedRect.x -= type.speed;
+		enemy->presentedRect.x -= typeOfEnemy.speed;
 	}
 	if( player.presentedRect.y > enemy->presentedRect.y )
 	{
-		enemy->presentedRect.y += type.speed;
+		enemy->presentedRect.y += typeOfEnemy.speed;
 	}
 	if( player.presentedRect.y < enemy->presentedRect.y )
 	{
-		enemy->presentedRect.y -= type.speed;
+		enemy->presentedRect.y -= typeOfEnemy.speed;
 	}
 }

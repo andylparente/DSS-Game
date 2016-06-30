@@ -28,6 +28,23 @@ typedef struct _character
 
 } Character;
 
+/*
+typedef struct _shooter
+{
+	SDL_Texture* sprite;
+	SDL_Rect snipRect;
+	SDL_Rect presentedRect;
+	
+	Mix_Chunk* gotHitSound;
+	Mix_Chunk* deathSound;
+
+	int healthPoints;
+	float speed;
+	int damage;
+	
+	// Tipo de projetil que o personagem atira
+	//MagicProjectile type;
+} Shooter; */
 
 typedef struct _magic_projectile
 {
@@ -61,6 +78,16 @@ typedef struct _item
 	Mix_Chunk* collectedSound;	
 } Item;
 
+/*
+typedef struct _collectible
+{
+	SDL_Texture* sprite;
+	SDL_Rect snipRect;
+	SDL_Rect presentedRect;
+	
+	Mix_Chunk* collectedSound;
+} Collectible; */
+
 
 typedef struct _map
 {
@@ -69,7 +96,6 @@ typedef struct _map
 	SDL_Rect snipRect;
 	SDL_Rect presentedRect;
 } Map;
-
 
 // Funcoes para diversas coisas rxrxrxrxrx
 void chasing( Character* enemy, Character typeOfEnemy, Character player );
@@ -86,7 +112,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Contadores (preguica de colocar l_ para essas variaveis locais)
 	int i = 0;
 	int i2 = 0;
-	int a = 0, x, y, l_animationCycle = 0, l_deathAnimationCounter = 0;
+	int a = 0, x, y, l_deathAnimationCounter = 0;
 
 	// Flag para trocar o estado do jogo
 	int l_gameState= 3;
@@ -125,16 +151,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//Map lastMap;
 	
 	// Informacoes do player no estado incicial
-	player.sprite = load_texture( "images/sprites/sombra80-60.png", l_window, l_renderer );
+	player.sprite = load_texture( "images/sprites/sombra100-60.png", l_window, l_renderer );
 	player.spriteDeath = load_texture( "images/sprites/sombradeath100-60.png", l_window, l_renderer );
-	player.snipRect.x = 320;
+	player.snipRect.x = 400;
 	player.snipRect.y = 0;
-    player.snipRect.w = 80;
+    player.snipRect.w = 100;
     player.snipRect.h = 60;
 	player.presentedRect.x = 800/2 - 80/2;
-	player.presentedRect.y = 600/2 - 60/2;
+	player.presentedRect.y = 600/2 - 80/2;
 	player.presentedRect.w = 80;
-	player.presentedRect.h = 60;
+	player.presentedRect.h = 80;
 	//player.gotHit = load_sfx( "?" );
 	//player.deathSound = load_sfx( "?" );
 	player.healthPoints = 100;
@@ -208,9 +234,9 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	}
 	
 	// Informacoes sobre o mapa
-	firstMap.texture = load_texture( "images/levels/mapabase.png", l_window, l_renderer );
+	firstMap.texture = load_texture( "images/levels/entire.png", l_window, l_renderer );
 	firstMap.snipRect.x = 1600;
-	firstMap.snipRect.y = 600;
+	firstMap.snipRect.y = 1200;
 	firstMap.snipRect.w = 800;
 	firstMap.snipRect.h = 600;
 	firstMap.presentedRect.x = 0;
@@ -349,57 +375,38 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			   			{
 							case SDLK_d:	
 			   					velx = 5.0;
-			   					
-			   					if( l_animationCycle%15 == 0 )
-								{
-									player.snipRect.x += 80;
-								}
-
-			   					if( player.snipRect.x < 1120 || player.snipRect.x > 1200 )
+			  					/*player.snipRect.x += 100;
+			   					if( player.snipRect.x < 1400 || player.snipRect.x > 1500 )
 				    			{
-				    				player.snipRect.x = 1120;
-								}
-
-								l_animationCycle++;
+				    				player.snipRect.x = 1400;
+								} */
 								break;
 					
 							case SDLK_a: 
 				   				velx = -5.0;
-				   				if( l_animationCycle%15 == 0 )
-								{
-									player.snipRect.x += 80;
-								}
-								if( player.snipRect.x < 1440 || player.snipRect.x > 1520 )
+								/*player.snipRect.x -= 100;
+								if( player.snipRect.x < 1800 || player.snipRect.x > 1900 )
 					   			{
-					   				player.snipRect.x = 1440;
-								}
-								l_animationCycle++;
+					   				player.snipRect.x = 1800;
+								}*/
 								break;
 					
 							case SDLK_w:
 				   				vely = -5.0;
-				   				if( l_animationCycle%15 == 0 )
-								{
-									player.snipRect.x += 80;
-								}
-								if( player.snipRect.x < 160 || player.snipRect.x > 240 )
+								/*player.snipRect.x -= 100;
+								if( player.snipRect.x < 200 || player.snipRect.x > 300 )
 					   			{
-					   				player.snipRect.x = 160;
-								}
-								l_animationCycle++;
+					   				player.snipRect.x = 200;
+								}*/
 								break;
 					
 							case SDLK_s:
 				   				vely = 5.0;
-				   				if( l_animationCycle%15 == 0 )
-								{
-									player.snipRect.x += 80;
-								}
-								if( player.snipRect.x < 0 || player.snipRect.x > 80 )
+								/*player.snipRect.x += 100;
+								if( player.snipRect.x < 0 || player.snipRect.x > 100 )
 					   			{	
 					   				player.snipRect.x = 0;
-								}
-								l_animationCycle++;
+								}*/
 								break;
 					
 							case SDLK_RETURN:
@@ -475,23 +482,19 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				    case SDL_KEYUP:
 				    	switch( e.key.keysym.sym )
 				        {
-							case SDLK_d:
-								l_animationCycle = 0;	
+							case SDLK_d:	
 				        		velx = 0.0;
 								break;
 					
-							case SDLK_a:
-								l_animationCycle = 0; 
+							case SDLK_a: 
 								velx = 0.0;
 								break;
 					
 							case SDLK_w:
-								l_animationCycle = 0;
 								vely = 0.0;
 								break;
 					
 							case SDLK_s:
-								l_animationCycle = 0;
 								vely = 0.0;
 								break;
 				        }
@@ -503,71 +506,15 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				    // Fez nada
 				    default:
-				    	if( l_animationCycle%15 == 0 )
+						/*player.snipRect.x += 100;
+						if( player.snipRect.x < 400 || player.snipRect.x > 700 )
 						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 320 || player.snipRect.x > 560 )
-						{
-							player.snipRect.x = 320;
-						}
-						l_animationCycle++;
+							player.snipRect.x = 400;
+						} */
 						break;
 				}
 				player.presentedRect.x += velx;
 				player.presentedRect.y += vely;   
-			}
-
-			if( skeletonWave1[0].activate == 0 && skeletonWave1[1].activate == 0 && skeletonWave1[2].activate == 0 && skeletonWave1[3].activate == 0 && skeletonWave1[4].activate == 0 )
-			{
-				if( player.presentedRect.x <= 19 )
-				{
-					if( (player.presentedRect.y < 259) || (player.presentedRect.y+player.presentedRect.h > 340) )
-					{
-						player.presentedRect.x = 20;
-					}
-				}
-				if( player.presentedRect.x+player.presentedRect.w >= 780 )
-				{
-					if( (player.presentedRect.y < 259) || (player.presentedRect.y+player.presentedRect.h > 340) )
-					{
-						player.presentedRect.x = 779 - player.presentedRect.w;
-					}
-				}
-				if( player.presentedRect.y <= 129 )
-				{
-					if( (player.presentedRect.x < 359) || (player.presentedRect.x+player.presentedRect.w > 440) )
-					{
-						player.presentedRect.y = 130;
-					}
-				}
-				if( player.presentedRect.y+player.presentedRect.h >= 580 )
-				{
-					if( (player.presentedRect.x < 359) || (player.presentedRect.x+player.presentedRect.w > 440) )
-					{
-						player.presentedRect.y = 579 - player.presentedRect.h;
-					}
-				}
-			}
-
-			else
-			{
-				if( player.presentedRect.x <= 19 )
-				{
-					player.presentedRect.x = 20;
-				}
-				else if( player.presentedRect.x+player.presentedRect.w >= 780 )
-				{
-					player.presentedRect.x = 779 - player.presentedRect.w;
-				}
-				if( player.presentedRect.y <= 129 )
-				{
-					player.presentedRect.y = 130;
-				}
-				else if( player.presentedRect.y+player.presentedRect.h >= 580 )
-				{
-					player.presentedRect.y = 579 - player.presentedRect.h;
-				}
 			}
 
 			SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );

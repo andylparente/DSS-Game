@@ -29,6 +29,10 @@ typedef struct _character
 	int animationCycleCounter;
 	int deathAnimationCounter;
 
+	// Para qual direcao e sentido o personagem esta indo (utilizado na IA de inimigos atiradores)
+	char direction;
+	int way;
+
 	// Tipo de projetil que o personagem atira
 	//MagicProjectile type;
 
@@ -91,6 +95,12 @@ void circular_sprite_arrangement( SDL_Rect enemyPR, SDL_Rect* playerPR );
 // Atualiza a posicao do mapa e do player, em um loop, gera uma animacao 
 void scroll_map_animation( char c, Map* map, Character* player );
 
+// Coloca o inimigo na porta correspondente
+void passing_through_door( char doorLocation, Character* enemy );
+
+// Inteligencia artificial do beholder
+void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player );
+
 
 // UHUUUUUUUUUUUUUUUUUHUHUHUUHUHUUUUUUUUUUUUUUUUUU *_* HHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUHUHUHUUUUUUUUUUUUUUUUUUUUUUUUUU *_* UUUUUUUUUUUHUHUHUHUUUUHUHU //
 
@@ -110,6 +120,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//Character necromancer;
 	//Character demonBoss;
 
+	// Personagens que causam dano somente atraves do toque
+	Character skeleton;
+	//Character gatekeeper;
+
 	// Tipos de projeteis/tiros
 	//MagicProjectile arcaneMissile;
 	MagicProjectile fireBall;
@@ -117,10 +131,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//MagicProjectile laserBeam;
 	//MagicProjectile ghastlyShooting;
 	//MagicProjectile demonicBolt;
-
-	// Personagens que causam dano somente atraves do toque
-	Character skeleton;
-	//Character gatekeeper;
 	
 	// Itens que modificam o jogador
 	//Item blueRobe;
@@ -166,17 +176,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	{
 		fireBallV[a].snipRect.x = 0;
 		fireBallV[a].snipRect.y = 0;
-		fireBallV[a].snipRect.h = 30;
-		fireBallV[a].snipRect.w = 30;
-		fireBallV[a].presentedRect.x = 900;
-		fireBallV[a].presentedRect.y = 900; 
+		fireBallV[a].snipRect.w = 39;
+		fireBallV[a].snipRect.h = 20;
 		fireBallV[a].presentedRect.w = 46;
 		fireBallV[a].presentedRect.h = 46; 
 		fireBallV[a].animationCycleCounter = 0;
+		fireBallV[a].activate = 0;
 	}
 
 	// Informacoes do tipo de projetil
-	fireBall.sprite = load_texture( "images/sprites/fireball30x30.png", l_window, l_renderer );
+	fireBall.sprite = load_texture( "images/sprites/newfireball39x20.png", l_window, l_renderer );
 	//fireBall.hitWall = load_sfx( "?" );
 	//fireBall.hitCharacter = load_sfx( "?" );
 	fireBall.damage = 50;
@@ -195,14 +204,12 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	Character skeletonWave1[5];
 	//Character skeletonWave2[10];
 
-	for( a = 0 ; a < 5 ; a++ )
+	for( a = 0 ; a < 4 ; a++ )
 	{
 		skeletonWave1[a].snipRect.x = 0;
 		skeletonWave1[a].snipRect.y = 0;
 		skeletonWave1[a].snipRect.h = 55;
 		skeletonWave1[a].snipRect.w = 55;
-		skeletonWave1[a].presentedRect.x = 0;
-		skeletonWave1[a].presentedRect.y = (0 + a*100); 
 		skeletonWave1[a].presentedRect.w = 60;
 		skeletonWave1[a].presentedRect.h = 60; 
 		skeletonWave1[a].activate = 0;
@@ -210,33 +217,31 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		skeletonWave1[a].deathAnimationCounter = 0;
 	}
 
-	/*// Informacoes do beholder (shooter)
+	// Informacoes do beholder (shooter)
 	beholder.sprite = load_texture( "images/sprites/beholder_90x90.png", l_window, l_renderer );
 	beholder.spriteDeath = load_texture( "images/sprites/beholderM90x90.png", l_window, l_renderer );
 	//beholder.gotHit = load_sfx( "?" );
 	//beholder.deathSound = load_sfx( "?" );
-	beholder.healthPoints = 100;
-	beholder.speed = 3.5;
+	beholder.healthPoints = 250;
+	beholder.speed = 7.0;
 	beholder.damage = 2;
 	
 	// Quantidade de inimigos
 	Character beholderWave1[5];
 	//Character beholderWave2[10];
 
-	for( a = 0 ; a < 5 ; a++ )
+	for( a = 0 ; a < 4 ; a++ )
 	{
 		beholderWave1[a].snipRect.x = 0;
 		beholderWave1[a].snipRect.y = 0;
-		beholderWave1[a].snipRect.h = 55;
-		beholderWave1[a].snipRect.w = 55;
-		beholderWave1[a].presentedRect.x = 0;
-		beholderWave1[a].presentedRect.y = (0 + a*100); 
-		beholderWave1[a].presentedRect.w = 60;
-		beholderWave1[a].presentedRect.h = 60; 
+		beholderWave1[a].snipRect.h = 90;
+		beholderWave1[a].snipRect.w = 90;
+		beholderWave1[a].presentedRect.w = 80;
+		beholderWave1[a].presentedRect.h = 80; 
 		beholderWave1[a].activate = 0;
 		beholderWave1[a].animationCycleCounter = 0;
 		beholderWave1[a].deathAnimationCounter = 0;
-	}*/
+	}
 
 	// Informacoes do colecionavel
 	greenCrystal.sprite = load_texture( "images/sprites/green_crystal.png", l_window, l_renderer );
@@ -270,6 +275,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Cuidador de evento
     SDL_Event e;
     
+    // Teclas pressionadas (movimentacao utiliza esse tipo)
 	const Uint8 *pressedKeyStates = SDL_GetKeyboardState(NULL);
 
 	// Velocidade x e y do player
@@ -288,14 +294,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		{
 			if( fireBallV[a].activate == 0)
 			{
-				fireBallV[a].snipRect.x = 0;
-				fireBallV[a].snipRect.y = 0;
-				fireBallV[a].snipRect.h = 30;
-				fireBallV[a].snipRect.w = 30;
 				fireBallV[a].presentedRect.x = 900;
-				fireBallV[a].presentedRect.y = 900; 
-				fireBallV[a].presentedRect.w = 46;
-				fireBallV[a].presentedRect.h = 46; 
+				fireBallV[a].presentedRect.y = 900;  
 				fireBallV[a].animationCycleCounter = 0;
 			}	
 			if( fireBallV[a].presentedRect.y < 132 || fireBallV[a].presentedRect.x < 18 || (fireBallV[a].presentedRect.x+fireBallV[a].presentedRect.w) > 780 || (fireBallV[a].presentedRect.y+fireBallV[a].presentedRect.h) > 580 )
@@ -350,12 +350,12 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 					case 4:
 						fireBallV[a].presentedRect.x += fireBall.speed;
-						if( fireBallV[a].animationCycleCounter%10 == 0 )
+						if( fireBallV[a].animationCycleCounter%8 == 0 )
 						{
-							fireBallV[a].snipRect.x += 30;
-							if( fireBallV[a].snipRect.x < 180 || fireBallV[a].snipRect.x > 210 )
+							fireBallV[a].snipRect.x += 39;
+							if( fireBallV[a].snipRect.x < 0 || fireBallV[a].snipRect.x > 350 )
 							{
-								fireBallV[a].snipRect.x = 180;
+								fireBallV[a].snipRect.x = 0;
 							}
 						}
 						fireBallV[a].animationCycleCounter++;
@@ -366,9 +366,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			}
 		}
 
-        // Onde o inimigo aparecerao na tela
-        for( a = 0 ; a < 5 ; a++ )
-        {
+        // Onde os inimigos aparecerao na tela
+        for( a = 0 ; a < 4 ; a++ )
+        {	
+        	// Sobre o esqueleto
            	if( skeletonWave1[a].activate == 1 )
            	{
 				chasing( &skeletonWave1[a], skeleton, player );
@@ -391,7 +392,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					}				
 				}
 
-				for( x = 0 ; x < 5 ; x++ )
+				for( x = 0 ; x < 4 ; x++ )
 				{
 					circular_sprite_arrangement( skeletonWave1[x].presentedRect, &player.presentedRect );
 				}
@@ -422,6 +423,63 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			}	
         }
 
+        for( a = 0 ; a < 4 ; a++ )
+        {	
+        	// Sobre o beholder
+           	if( beholderWave1[a].activate == 1 )
+           	{
+				linear_walk_and_shoot( &beholderWave1[a], beholder, player );
+
+				if ( circular_collision_detection( player.presentedRect, beholderWave1[a].presentedRect, 5 ) != 0 )
+				{
+					player.healthPoints -= beholder.damage;
+				}
+
+				for ( i2 = 0 ; i2 < 50 ; i2++ )
+				{
+					if( circular_collision_detection( fireBallV[i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
+					{
+						beholderWave1[a].healthPoints -= fireBall.damage;
+						fireBallV[i2].activate = 0;
+						if( beholderWave1[a].healthPoints <= 0 )
+						{
+							beholderWave1[a].activate = 2;
+						}
+					}				
+				}
+
+				for( x = 0 ; x < 4 ; x++ )
+				{
+					circular_sprite_arrangement( beholderWave1[x].presentedRect, &player.presentedRect );
+				}
+
+				SDL_RenderCopy( l_renderer, beholder.sprite, &beholderWave1[a].snipRect, &beholderWave1[a].presentedRect );	
+			}
+			// Animacao de morte do beholder
+			if( beholderWave1[a].activate == 2 )
+			{
+				if( beholderWave1[a].deathAnimationCounter == 0 ) 
+				{
+					beholderWave1[a].snipRect.x = 0;
+				}
+
+				SDL_RenderCopy( l_renderer, beholder.spriteDeath, &beholderWave1[a].snipRect, &beholderWave1[a].presentedRect );
+
+				if( beholderWave1[a].deathAnimationCounter%30 == 0 )
+				{
+					beholderWave1[a].snipRect.x += 90;
+				}
+
+				beholderWave1[a].deathAnimationCounter++;
+
+				if( beholderWave1[a].deathAnimationCounter == 120 )
+				{
+					beholderWave1[a].activate = 0;
+				}
+			}
+		}	
+        
+
         // Onde os itens aparecerao na tela
         for( a = 0 ; a < 3 ; a++ )
         {
@@ -448,16 +506,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
         // Enquanto o jogador esta vivo
         if( player.healthPoints > 0 )
         {
-        	/*if( player.animationCycleCounter%20 == 0 )
-			{
-				player.snipRect.x += 80;
-			}
-			if( player.snipRect.x < 320 || player.snipRect.x > 560 )
-			{
-				player.snipRect.x = 320;
-			}
-			player.animationCycleCounter++;*/
-
 	        // Lista de eventos
 			while( SDL_PollEvent( &e ) != 0 )
 			{
@@ -473,10 +521,23 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					// Esqueletos aparecem
 					if( e.key.keysym.sym == SDLK_RETURN )
 					{
-						for( a = 0 ; a < 5 ; a++ )
+						/*for( a = 0 ; a < 4 ; a++ )
 						{
 							skeletonWave1[a].activate = 1;
-						}                                  
+						}
+						passing_through_door( 'l', &skeletonWave1[0] );
+						passing_through_door( 'r', &skeletonWave1[1] );
+						passing_through_door( 'u', &skeletonWave1[2] );
+						passing_through_door( 'd', &skeletonWave1[3] );*/
+
+						for( a = 0 ; a < 4 ; a++ )
+						{
+							beholderWave1[a].activate = 1;
+						}
+						passing_through_door( 'l', &beholderWave1[0] );
+						passing_through_door( 'r', &beholderWave1[1] );
+						passing_through_door( 'u', &beholderWave1[2] );
+						passing_through_door( 'd', &beholderWave1[3] );
 					}
 
 					// Itens aparecem
@@ -525,7 +586,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						player.animationCycleCounter++;
 					}
 
-					if( e.key.keysym.sym == SDLK_DOWN )
+					else if( e.key.keysym.sym == SDLK_DOWN )
 					{
 						fireBallV[i].snipRect.x = 120;
 						fireBallV[i].presentedRect.x = player.presentedRect.x;
@@ -549,7 +610,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						player.animationCycleCounter++;
 					}
 
-					if( e.key.keysym.sym == SDLK_LEFT )
+					else if( e.key.keysym.sym == SDLK_LEFT )
 					{
 						fireBallV[i].snipRect.x = 60;
 						fireBallV[i].presentedRect.x = player.presentedRect.x;
@@ -573,20 +634,20 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						player.animationCycleCounter++;
 					}
 
-					if( e.key.keysym.sym == SDLK_RIGHT )
+					else if( e.key.keysym.sym == SDLK_RIGHT )
 					{
-						fireBallV[i].snipRect.x = 180;
+						//fireBallV[i].snipRect.x = 0;
 						fireBallV[i].presentedRect.x = player.presentedRect.x;
 						fireBallV[i].presentedRect.y = player.presentedRect.y; 
 						fireBallV[i].direction = 4;
 						fireBallV[i].activate = 1;
-						fireBallV[i].animationCycleCounter = 0;
+						//fireBallV[i].animationCycleCounter = 0;
 						i++;
 						if( i > 49 )
 						{
 							i = 0;
 						}
-						if( player.animationCycleCounter%5 == 0 )
+						/*if( player.animationCycleCounter%5 == 0 )
 						{
 							player.snipRect.x += 80;
 						}
@@ -594,7 +655,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					   	{
 					   		player.snipRect.x = 1280;
 						}
-						player.animationCycleCounter++;
+						player.animationCycleCounter++;*/
 					}
 				}
 
@@ -625,29 +686,17 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						vely = 0.0;
 					}
 				}
-				    /*
-				    // Moveu o mouse		
-				    case SDL_MOUSEMOTION:
-				    	break;
-
-				    // Eventos de janela (por exemplo, cursor do mouse entrar ou sair da janela)
-				     case SDL_WINDOWEVENT:
-				     	break;
-
-				    // Fez nada
-				    default:
-						break;*/
 			}
 			
 				
-			// Pressionou uma tecla
-	  		if( pressedKeyStates[ SDL_SCANCODE_D] )
+			// Pressionou uma tecla de movimentacao
+	  		if( pressedKeyStates[SDL_SCANCODE_D] )
 	   		{
 				// Velocidade do player que sera acrescentada a posicao atual	
-	   			velx = 5.0;
+	   			velx = player.speed;
 			   			
 	   			// Define a velociade que ele troca o sprite
-	   			if( player.animationCycleCounter%5 == 0 )
+	   			if( player.animationCycleCounter%10 == 0 )
 				{
 					player.snipRect.x += 80;
 				}
@@ -658,12 +707,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		   		{
 		   			player.snipRect.x = 1120;
 				}
-			}
-			
-			if( pressedKeyStates[ SDL_SCANCODE_A] )
+			}		
+			if( pressedKeyStates[SDL_SCANCODE_A] )
 			{ 
-		   		velx = -5.0;
-		   		if( player.animationCycleCounter%5 == 0 )
+		   		velx = (-1)*player.speed;
+		   		if( player.animationCycleCounter%10 == 0 )
 				{
 					player.snipRect.x += 80;
 				}
@@ -672,12 +720,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					player.snipRect.x = 1440;
 				}
 				player.animationCycleCounter++;
-			}
-					
-			if( pressedKeyStates[ SDL_SCANCODE_W] )
+			}				
+			if( pressedKeyStates[SDL_SCANCODE_W] )
 			{
-		   		vely = -5.0;
-		   		if( player.animationCycleCounter%5 == 0 )
+		   		vely = (-1)*player.speed;
+		   		if( player.animationCycleCounter%10 == 0 )
 				{
 					player.snipRect.x += 80;
 				}
@@ -686,12 +733,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			   		player.snipRect.x = 160;
 				}
 				player.animationCycleCounter++;
-			}
-					
-			if( pressedKeyStates[ SDL_SCANCODE_S] )
+			}			
+			if( pressedKeyStates[SDL_SCANCODE_S] )
 			{
-		   		vely = 5.0;
-		   		if( player.animationCycleCounter%5 == 0 )
+		   		vely = player.speed;
+		   		if( player.animationCycleCounter%10 == 0 )
 				{
 					player.snipRect.x += 80;
 				}
@@ -707,7 +753,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			player.presentedRect.y += vely;
 
 			// Se os esqueletos estao desativados e possivel sair da sala
-			if( skeletonWave1[0].activate == 0 )//&& skeletonWave1[1].activate == 0 && skeletonWave1[2].activate == 0 && skeletonWave1[3].activate == 0 && skeletonWave1[4].activate == 0 )
+			if( skeletonWave1[0].activate == 0 && skeletonWave1[1].activate == 0 && skeletonWave1[2].activate == 0 && skeletonWave1[3].activate == 0 )
 			{
 				// Permite passar pelas portas
 				if( player.presentedRect.x <= 19 )
@@ -871,10 +917,12 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	SDL_DestroyTexture( player.sprite );
 	SDL_DestroyTexture( firstMap.texture );
 	SDL_DestroyTexture( skeleton.sprite );
+	SDL_DestroyTexture( beholder.sprite );
 	SDL_DestroyTexture( greenCrystal.sprite);
 	player.sprite = NULL;
 	firstMap.texture = NULL;
 	skeleton.sprite = NULL;
+	beholder.sprite = NULL;
 	greenCrystal.sprite = NULL;
 	
 	// Limpa o renderizador
@@ -1025,4 +1073,103 @@ void scroll_map_animation( char c, Map* map, Character* player )
 			player->presentedRect.x -= 5;
 			break;
 	}
+}
+
+void passing_through_door( char doorLocation, Character* enemy )
+{
+	switch( doorLocation )
+	{
+		case 'u':
+			enemy->presentedRect.x = 400 - enemy->presentedRect.w/2;
+			enemy->presentedRect.y = 131;
+			break;
+
+		case 'd':
+			enemy->presentedRect.x = 400 - enemy->presentedRect.w/2;
+			enemy->presentedRect.y = 580 - enemy->presentedRect.h;
+			break;
+
+		case 'l':
+			enemy->presentedRect.x = 21;
+			enemy->presentedRect.y = 300 - enemy->presentedRect.h/2;
+			break;
+
+		case 'r':
+			enemy->presentedRect.x = 780 - enemy->presentedRect.w;
+			enemy->presentedRect.y = 300 - enemy->presentedRect.h/2;
+			break;
+	}
+
+	enemy->direction = doorLocation;
+}
+
+void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player )
+{
+	// Andar horizontal 
+	if( enemy->direction == 'u' || enemy->direction == 'd' ) 
+	{
+		if( (enemy->presentedRect.x+enemy->presentedRect.w/2) >= (player.presentedRect.x+25) && (enemy->presentedRect.x+enemy->presentedRect.w/2) <= (player.presentedRect.x+41) )
+		{
+			enemy->damage++; //Tirar isso
+		}
+
+		else
+		{
+			if( enemy->way == 0 ) // Esquerda
+			{
+				if( enemy->presentedRect.x > 21 )
+				{
+					enemy->presentedRect.x -= typeOfEnemy.speed;
+				}
+				else
+				{
+					enemy->way = 1;
+				}
+			}
+			else if( enemy->way == 1 ) // Direta
+			{
+				if( enemy->presentedRect.x+enemy->presentedRect.w < (780 - enemy->presentedRect.w) )
+				{
+					enemy->presentedRect.x += typeOfEnemy.speed;
+				}
+				else
+				{
+					enemy->way = 0;
+				}	
+			}
+		}
+	}
+	// Andar vertical
+	else if( enemy->direction == 'l' || enemy->direction ==  'r' )
+	{
+		if( (enemy->presentedRect.y+enemy->presentedRect.h/2) >= (player.presentedRect.y+25) && (enemy->presentedRect.y+enemy->presentedRect.h/2) <= (player.presentedRect.y+41) )
+		{
+			enemy->damage++; //Tirar isso // Atirar
+		}
+		else
+		{
+			if( enemy->way == 0 ) // Cima
+			{
+				if( enemy->presentedRect.y > 131 )
+				{
+					enemy->presentedRect.y -= typeOfEnemy.speed;
+				}
+				else
+				{
+					enemy->way = 1;
+				}
+			}
+			else if( enemy->way == 1 ) // Baixa
+			{
+				if( enemy->presentedRect.y+enemy->presentedRect.h < (580 - enemy->presentedRect.h) )
+				{
+					enemy->presentedRect.y += typeOfEnemy.speed;
+				}
+				else
+				{
+					enemy->way = 0;
+				}	
+			}
+		}
+	} 
 }

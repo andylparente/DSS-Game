@@ -6,13 +6,15 @@
 #include "opening.h"
 #include "title_screen.h"
 #include "menu.h"
+#include "gameplay.h"
+#include "history.h"
+#include "credits.h"
+#include "highscore.h"
+#include "options.h"
 
 // Dimensoes constantes da tela
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;	
-
-// Flag para sair do jogo
-int g_quitGame = 0;	
 
 // Cria os estados do jogo
 int STATE_OPENING = 0;
@@ -23,9 +25,10 @@ int STATE_HIGHSCORE = 4;
 int STATE_CREDITS = 5;
 int STATE_OPTIONS = 6;
 int STATE_PAUSE = 7;
+int STATE_HISTORY = 8;
 
 // Iniciliza o estado do jogo como tela inicial
-int g_gameState = 0;
+int g_gameState = 2;
 
 // A janela do jogo
 SDL_Window* g_window = NULL;
@@ -52,7 +55,7 @@ void init_boot_game()
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		
 		// Fechará o jogo ao passar pelo loop principal
-		g_quitGame = 1;
+		g_gameState = 666;
 	}
 	
 	else
@@ -62,7 +65,7 @@ void init_boot_game()
 		if( g_window == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-			g_quitGame = 1;
+			g_gameState = 666;
 		}
 		
 		else
@@ -72,7 +75,7 @@ void init_boot_game()
 			if( g_renderer == NULL )
 			{
 				printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-				g_quitGame = 1;
+				g_gameState = 666;
 			}
 			
 			else
@@ -85,7 +88,7 @@ void init_boot_game()
 				if( !( IMG_Init( imgFlags ) & imgFlags ) )
 				{
 					printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
-					g_quitGame = 1;
+					g_gameState = 666;
 				}
 				
 				else
@@ -94,7 +97,7 @@ void init_boot_game()
 	                if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
 	                {
 	                    printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
-	                    g_quitGame = 1;
+	                    g_gameState = 666;
 	                }
 	        	}
 			}
@@ -111,7 +114,7 @@ int main( int argc, char *argv[] )
 	SDL_Event e;
 
 	// Enquanto a aplicação esta rodando
-	while( g_quitGame != 1 )
+	while( g_gameState != 666 )
 	{
 		// Cuida dos eventos na fila
 		while( SDL_PollEvent( &e ) != 0 )
@@ -119,7 +122,7 @@ int main( int argc, char *argv[] )
 			// Usuario deseja sair
 			if( e.type == SDL_QUIT )
 			{
-				g_quitGame = 1;
+				g_gameState = -1;
 			}
 		}
 
@@ -127,13 +130,11 @@ int main( int argc, char *argv[] )
 		switch ( g_gameState )
 		{
 			case 0:
-				g_quitGame = opening_logic( g_window, g_renderer );
-				g_gameState = 1;
+				g_gameState = opening_logic( g_window, g_renderer );
 				break;
 	
 			case 1:
-				g_quitGame = title_screen_logic( g_window, g_renderer );
-				g_gameState = 2;
+				g_gameState = title_screen_logic( g_window, g_renderer );
 				break;
 
 			case 2: 
@@ -141,32 +142,32 @@ int main( int argc, char *argv[] )
 				break; 
 
 			case 3:
-				//gameplay_logic(); 
-				g_quitGame = 1;
+				g_gameState = gameplay_logic( g_window, g_renderer ); 
 				break;
 
+			case 6:
+				g_gameState = options_logic( g_window, g_renderer );
+				break;
+				
 			case 4:
-				//options_logic(); 
-				g_quitGame = 1;
+				g_gameState = highscore_logic( g_window, g_renderer );
 				break;
 				
 			case 5:
-				//highscore_logic();
-				g_quitGame = 1;
-				break;
-				
-			case 6:
-				//credits_logic();
-				g_quitGame = 1;
+				g_gameState = credits_logic( g_window, g_renderer );
 				break;		
 
 			case 7:
-				//pause_logic();
-				g_quitGame = 1; 
+				//g_gameState = pause_logic( g_window, g_renderer );
+				g_gameState = -1;
+				break;
+
+			case 8:
+				g_gameState = history_logic( g_window, g_renderer );
 				break;
 
 			default:
-				g_quitGame = 1;
+				g_gameState = 666;
 				break; 
 		}
 	}
@@ -179,84 +180,6 @@ int main( int argc, char *argv[] )
 
 	return close_game();
 }
-
-/*
-int gameplay_logic( int argc, char *argv[] )
-{
-	free_music_sfx( 'b' );
-	free_texture();
-
-	// "Velocidade" do sprites
-	float velx = 2.5;	
-	
-	load_Texture( "mapa.png" ); 
-	SDL_RenderClear( g_renderer );
-    SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-    
-    SDL_Event e;
-    
-    // Area que sera apresentada da imagem fonte
-	SDL_Rect l_srcRect;
-	l_srcRect.x = 0;
-	l_srcRect.y = 0;
-    l_srcRect.w = 80;
-    l_srcRect.h = 80;    
-    
-    // Area onde a imagem fonte sera aplicada
-	SDL_Rect l_dstRect;	
-	l_dstRect.x = SCREEN_WIDTH/2;
-  	l_dstRect.y = SCREEN_HEIGHT/2;
-   	l_dstRect.w = 80;
-   	l_dstRect.h = 80;
-	
-	load_Texture( "sprites/sombra100-60.png" );
-	SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
-	SDL_RenderPresent( g_renderer );
-
-	 while( g_gameState == 3 )
-	 {
-	 	while( SDL_PollEvent( &e ) != 0 )
-		{
-
-			free_texture();
-	        SDL_RenderClear( g_renderer );		
-			load_Texture( "mapa.png" );
-	        SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-	        free_texture();
-			load_Texture( "sprites/sombra100-60.png" );
-	        SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
-	       	SDL_RenderPresent( g_renderer );
-		
-	    	if( e.type == SDL_KEYDOWN )
-			{
-	    		switch( e.key.keysym.sym )
-		   		{
-					case SDLK_RIGHT:
-	        			l_dstRect.x += velx;
-						break;
-	
-					case SDLK_LEFT: 
-						l_dstRect.x -= velx;
-						break;
-	
-					case SDLK_UP:
-						l_dstRect.y -= velx;
-						//l_srcRect.x -= l_srcRect.w;
-						break;
-	
-					case SDLK_DOWN:
-						l_dstRect.y += velx;
-						//l_srcRect.x -= l_srcRect.w; 
-						break;
-	
-					case SDLK_RETURN:
-						g_gameState = 5;                                     
-						break;
-           		}
-        	}
-        }
-	}
-} */
 
 int close_game()
 {

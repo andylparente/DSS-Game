@@ -22,11 +22,12 @@ typedef struct _character
 	Mix_Chunk* gotHit;
 	Mix_Chunk* deathSound;
 	
-	// Se esta aparecendo na tela, pontos de vida, velocidade com que se move e dano causado por contato fisico
+	// Se esta aparecendo na tela, pontos de vida, velocidade com que se move, dano causado por contato fisico e delay para cada tiro
 	int activate;
 	int healthPoints;
 	float speed;
 	int damage;
+	int shootDelayCounter;
 
 	// Contador para as animacoes
 	int animationCycleCounter;
@@ -169,6 +170,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	player.healthPoints = 100;
 	player.speed = 5.0;
 	//player.damage = 0;
+	player.shootDelayCounter = 0;
 	player.animationCycleCounter = 0;
 	player.deathAnimationCounter = 0;
 
@@ -176,7 +178,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//MagicProjectile arcaneMissileV[50];
 	MagicProjectile fireBallV[50];
 	//MagicProjectile iceSpearV[50];
-	MagicProjectile beholderBulletV[50];
+	MagicProjectile beholderBulletV[2];
 
 	// Informacoes do projetil fireBall
 	fireBall.sprite = load_texture( "images/sprites/fireball40x40.png", l_window, l_renderer );
@@ -206,7 +208,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	beholderBullet.speed = 5.0;
 
 	// Definindo info do vetor de beholderBullets
-	for( a = 0 ; a < 50 ; a++ )
+	for( x = 0 ; x < 2 ; x++ )
 	{
 		beholderBulletV[a].snipRect.x = 0;
 		beholderBulletV[a].snipRect.y = 0;
@@ -615,6 +617,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
         // Enquanto o jogador esta vivo
         if( player.healthPoints > 0 )
         {
+        	if( player.shootDelayCounter%20 != 0 )
+        	{
+        		player.shootDelayCounter++;
+        	}
+
 	        // Lista de eventos
 			while( SDL_PollEvent( &e ) != 0 )
 			{
@@ -668,103 +675,119 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					}
 
 					// O player atira 
-					if( e.key.keysym.sym == SDLK_UP )
+					if( pressedKeyStates[SDL_SCANCODE_UP] ) 
 					{
-						fireBallV[i].snipRect.x = 0;
-						fireBallV[i].presentedRect.x = player.presentedRect.x;
-						fireBallV[i].presentedRect.y = player.presentedRect.y; 
-						fireBallV[i].direction = 'u';
-						fireBallV[i].activate = 1;
-						fireBallV[i].animationCycleCounter = 0;
-
-						i++;
-
-						if( i > 49 )
+						if( player.shootDelayCounter%20 == 0 )
 						{
-							i = 0;
-						}
+							fireBallV[i].snipRect.x = 0;
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 'u';
+							fireBallV[i].activate = 1;
+							fireBallV[i].animationCycleCounter = 0;
 
-						if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
+							i++;
+
+							if( i > 49 )
+							{
+								i = 0;
+							}
+
+							if( player.animationCycleCounter%5 == 0 )
+							{
+								player.snipRect.x += 80;
+							}
+							if( player.snipRect.x < 640 || player.snipRect.x > 800 )
+						   	{
+						   		player.snipRect.x = 640;
+							}
+							player.animationCycleCounter++;
+							player.shootDelayCounter = 1;
 						}
-						if( player.snipRect.x < 640 || player.snipRect.x > 800 )
-					   	{
-					   		player.snipRect.x = 640;
-						}
-						player.animationCycleCounter++;
 					}
 
-					else if( e.key.keysym.sym == SDLK_DOWN )
+					else if( pressedKeyStates[SDL_SCANCODE_DOWN] )
 					{
-						fireBallV[i].snipRect.x = 120;
-						fireBallV[i].presentedRect.x = player.presentedRect.x;
-						fireBallV[i].presentedRect.y = player.presentedRect.y; 
-						fireBallV[i].direction = 'd';
-						fireBallV[i].activate = 1;
-						fireBallV[i].animationCycleCounter = 0;
-						i++;
-						if( i > 49 )
+						if( player.shootDelayCounter%20 == 0 )
 						{
-							i = 0;
+							fireBallV[i].snipRect.x = 120;
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 'd';
+							fireBallV[i].activate = 1;
+							fireBallV[i].animationCycleCounter = 0;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							if( player.animationCycleCounter%5 == 0 )
+							{
+								player.snipRect.x += 80;
+							}
+							if( player.snipRect.x < 880 || player.snipRect.x > 1040 )
+						   	{
+						   		player.snipRect.x = 880;
+							}
+							player.animationCycleCounter++;
+							player.shootDelayCounter = 1;
 						}
-						if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 880 || player.snipRect.x > 1040 )
-					   	{
-					   		player.snipRect.x = 880;
-						}
-						player.animationCycleCounter++;
 					}
 
-					else if( e.key.keysym.sym == SDLK_LEFT )
+					else if( pressedKeyStates[SDL_SCANCODE_LEFT] )
 					{
-						fireBallV[i].snipRect.x = 60;
-						fireBallV[i].presentedRect.x = player.presentedRect.x;
-						fireBallV[i].presentedRect.y = player.presentedRect.y; 
-						fireBallV[i].direction = 'l';
-						fireBallV[i].activate = 1;
-						fireBallV[i].animationCycleCounter = 0;
-						i++;
-						if( i > 49 )
+						if( player.shootDelayCounter%20 == 0 )
 						{
-							i = 0;
-						}
-						if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 1600 || player.snipRect.x > 1680 )
-					   	{
-					   		player.snipRect.x = 1600;
-						}
-						player.animationCycleCounter++;
+							fireBallV[i].snipRect.x = 60;
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 'l';
+							fireBallV[i].activate = 1;
+							fireBallV[i].animationCycleCounter = 0;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							if( player.animationCycleCounter%5 == 0 )
+							{
+								player.snipRect.x += 80;
+							}
+							if( player.snipRect.x < 1600 || player.snipRect.x > 1680 )
+						   	{
+						   		player.snipRect.x = 1600;
+							}
+							player.animationCycleCounter++;
+							player.shootDelayCounter = 1;
+						}	
 					}
 
-					else if( e.key.keysym.sym == SDLK_RIGHT )
+					else if( pressedKeyStates[SDL_SCANCODE_RIGHT] )
 					{
-						//fireBallV[i].snipRect.x = 0;
-						fireBallV[i].presentedRect.x = player.presentedRect.x;
-						fireBallV[i].presentedRect.y = player.presentedRect.y; 
-						fireBallV[i].direction = 'r';
-						fireBallV[i].activate = 1;
-						//fireBallV[i].animationCycleCounter = 0;
-						i++;
-						if( i > 49 )
+						if( player.shootDelayCounter%20 == 0 )
 						{
-							i = 0;
+							//fireBallV[i].snipRect.x = 0;
+							fireBallV[i].presentedRect.x = player.presentedRect.x;
+							fireBallV[i].presentedRect.y = player.presentedRect.y; 
+							fireBallV[i].direction = 'r';
+							fireBallV[i].activate = 1;
+							//fireBallV[i].animationCycleCounter = 0;
+							i++;
+							if( i > 49 )
+							{
+								i = 0;
+							}
+							/*if( player.animationCycleCounter%5 == 0 )
+							{
+								player.snipRect.x += 80;
+							}
+							if( player.snipRect.x < 1280 || player.snipRect.x > 1360 )
+						   	{
+						   		player.snipRect.x = 1280;
+							}
+							player.animationCycleCounter++;*/
+							player.shootDelayCounter = 1;
 						}
-						/*if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 1280 || player.snipRect.x > 1360 )
-					   	{
-					   		player.snipRect.x = 1280;
-						}
-						player.animationCycleCounter++;*/
 					}
 				}
 
@@ -1024,14 +1047,24 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	
 	// Libera imagens carregadas
 	SDL_DestroyTexture( player.sprite );
+	SDL_DestroyTexture( player.spriteDeath );
 	SDL_DestroyTexture( firstMap.texture );
 	SDL_DestroyTexture( skeleton.sprite );
+	SDL_DestroyTexture( skeleton.spriteDeath );
 	SDL_DestroyTexture( beholder.sprite );
+	SDL_DestroyTexture( beholder.spriteDeath );
+	SDL_DestroyTexture( fireBall.sprite );
+	SDL_DestroyTexture( beholderBullet.sprite );
 	SDL_DestroyTexture( greenCrystal.sprite);
 	player.sprite = NULL;
+	player.spriteDeath = NULL;
 	firstMap.texture = NULL;
 	skeleton.sprite = NULL;
+	skeleton.spriteDeath = NULL;
 	beholder.sprite = NULL;
+	beholder.spriteDeath = NULL;
+	fireBall.sprite = NULL;
+	beholderBullet.sprite = NULL;
 	greenCrystal.sprite = NULL;
 	
 	// Limpa o renderizador

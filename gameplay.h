@@ -270,7 +270,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Cuidador de evento
     SDL_Event e;
     
-	const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+	const Uint8 *pressedKeyStates = SDL_GetKeyboardState(NULL);
 
 	// Velocidade x e y do player
 	float velx = player.speed;
@@ -466,72 +466,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				{
 			    	l_gameState = -1;
 			    }
-				
-				// Pressionou uma tecla
+
+			    // Pressionou uma tecla
 				else if ( e.type == SDL_KEYDOWN )
 				{
-			  		if( e.key.keysym.sym == SDLK_d)
-			   		{
-						// Velocidade do player que sera acrescentada a posicao atual	
-			   			velx = 5.0;
-			   			
-			   			// Define a velociade que ele troca o sprite
-			   			if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						player.animationCycleCounter++;
-
-						//Ciclo de animacao 
-			   			if( player.snipRect.x < 1120 || player.snipRect.x > 1200 )
-				   		{
-				   			player.snipRect.x = 1120;
-						}
-					}
-
-					
-					if( e.key.keysym.sym == SDLK_a )
-					{ 
-				   		velx = -5.0;
-				   		if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 1440 || player.snipRect.x > 1520 )
-						{
-							player.snipRect.x = 1440;
-						}
-						player.animationCycleCounter++;
-					}
-					
-					if( e.key.keysym.sym == SDLK_w )
-					{
-				   		vely = -5.0;
-				   		if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 160 || player.snipRect.x > 240 )
-					   	{
-					   		player.snipRect.x = 160;
-						}
-						player.animationCycleCounter++;
-					}
-					
-					if( e.key.keysym.sym == SDLK_s )
-					{
-				   		vely = 5.0;
-				   		if( player.animationCycleCounter%5 == 0 )
-						{
-							player.snipRect.x += 80;
-						}
-						if( player.snipRect.x < 0 || player.snipRect.x > 80 )
-					   	{	
-					   		player.snipRect.x = 0;
-						}
-						player.animationCycleCounter++;
-					}
-					
 					// Esqueletos aparecem
 					if( e.key.keysym.sym == SDLK_RETURN )
 					{
@@ -699,10 +637,74 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				    // Fez nada
 				    default:
 						break;*/
-				// Atualiza a posicao do player somando a velocidade
-				player.presentedRect.x += velx;
-				player.presentedRect.y += vely;   
 			}
+			
+				
+			// Pressionou uma tecla
+	  		if( pressedKeyStates[ SDL_SCANCODE_D] )
+	   		{
+				// Velocidade do player que sera acrescentada a posicao atual	
+	   			velx = 5.0;
+			   			
+	   			// Define a velociade que ele troca o sprite
+	   			if( player.animationCycleCounter%5 == 0 )
+				{
+					player.snipRect.x += 80;
+				}
+				player.animationCycleCounter++;
+
+				//Ciclo de animacao 
+	   			if( player.snipRect.x < 1120 || player.snipRect.x > 1200 )
+		   		{
+		   			player.snipRect.x = 1120;
+				}
+			}
+			
+			if( pressedKeyStates[ SDL_SCANCODE_A] )
+			{ 
+		   		velx = -5.0;
+		   		if( player.animationCycleCounter%5 == 0 )
+				{
+					player.snipRect.x += 80;
+				}
+				if( player.snipRect.x < 1440 || player.snipRect.x > 1520 )
+				{
+					player.snipRect.x = 1440;
+				}
+				player.animationCycleCounter++;
+			}
+					
+			if( pressedKeyStates[ SDL_SCANCODE_W] )
+			{
+		   		vely = -5.0;
+		   		if( player.animationCycleCounter%5 == 0 )
+				{
+					player.snipRect.x += 80;
+				}
+				if( player.snipRect.x < 160 || player.snipRect.x > 240 )
+			   	{
+			   		player.snipRect.x = 160;
+				}
+				player.animationCycleCounter++;
+			}
+					
+			if( pressedKeyStates[ SDL_SCANCODE_S] )
+			{
+		   		vely = 5.0;
+		   		if( player.animationCycleCounter%5 == 0 )
+				{
+					player.snipRect.x += 80;
+				}
+				if( player.snipRect.x < 0 || player.snipRect.x > 80 )
+			   	{	
+			   		player.snipRect.x = 0;
+				}
+				player.animationCycleCounter++;
+			}
+
+			// Atualiza a posicao do player somando a velocidade
+			player.presentedRect.x += velx;
+			player.presentedRect.y += vely;
 
 			// Se os esqueletos estao desativados e possivel sair da sala
 			if( skeletonWave1[0].activate == 0 )//&& skeletonWave1[1].activate == 0 && skeletonWave1[2].activate == 0 && skeletonWave1[3].activate == 0 && skeletonWave1[4].activate == 0 )

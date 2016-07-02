@@ -1,0 +1,13 @@
+0 ; 90 - Down
+
+180 - Down Shooting
+
+270 ; 360 - Left
+
+450 - Left Shooting
+
+540 ; 630 - Right
+
+720 - Right Shooting
+
+810 ; 900 - Up (Shooting)

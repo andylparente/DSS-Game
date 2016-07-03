@@ -105,6 +105,8 @@ void passing_through_door( char doorLocation, Character* enemy );
 // Inteligencia artificial do beholder
 void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player );
 
+void projectile_update( MagicProjectile* bullet, MagicProjectile typeOfBullet, int sCounter, int sDeath, SDL_Window* l_window, SDL_Renderer* l_renderer );
+
 
 // UHUUUUUUUUUUUUUUUUUHUHUHUUHUHUUUUUUUUUUUUUUUUUU *_* HHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUHUHUHUUUUUUUUUUUUUUUUUUUUUUUUUU *_* UUUUUUUUUUUHUHUHUHUUUUHUHU //
 
@@ -114,9 +116,12 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	srand ( time( NULL ) );
 
 	// Contadores (preguica de colocar l_ para essas variaveis locais)
-	int i = 0;
+	int i = 0, j = 0;
 	int i2 = 0;
 	int a = 0, x, y;
+
+	// Tipo de tiro que o jogador esta usando
+	int kindOfShot = 0;
 
 	// Flag para trocar o estado do jogo
 	int l_gameState= 3;
@@ -137,6 +142,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//MagicProjectile iceSpear;
 	//MagicProjectile laserBeam;
 	MagicProjectile beholderBullet;
+	MagicProjectile necroShot;
 	//MagicProjectile demonicBolt;
 	
 	// Itens que modificam o jogador
@@ -176,49 +182,9 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 	// Quantidade de tiros
 	//MagicProjectile arcaneMissileV[50];
-	MagicProjectile fireBallV[50];
+	MagicProjectile fireBallV[1][50];
+	MagicProjectile necroShotV[1][20];
 	//MagicProjectile iceSpearV[50];
-	MagicProjectile beholderBulletV[2];
-
-	// Informacoes do projetil fireBall
-	fireBall.sprite = load_texture( "images/sprites/fireball40x40.png", l_window, l_renderer );
-	//fireBall.hitWall = load_sfx( "?" );
-	//fireBall.hitCharacter = load_sfx( "?" );
-	fireBall.damage = 50;
-	fireBall.speed = 8.0;
-
-	// Definindo info do vetor de fireBalls 
-	for( a = 0 ; a < 50 ; a++ )
-	{
-		fireBallV[a].snipRect.x = 0;
-		fireBallV[a].snipRect.y = 0;
-		fireBallV[a].snipRect.w = 40;
-		fireBallV[a].snipRect.h = 40;
-		fireBallV[a].presentedRect.w = 46;
-		fireBallV[a].presentedRect.h = 46; 
-		fireBallV[a].animationCycleCounter = 0;
-		fireBallV[a].activate = 0;
-	}
-
-	// Informacoes do projetil do beholder
-	beholderBullet.sprite = load_texture( "images/sprites/beholdershot40x40.png", l_window, l_renderer );
-	//beholderBullet.hitWall = load_sfx( "?" );
-	//beholderBullet.hitCharacter = load_sfx( "?" );
-	beholderBullet.damage = 25;
-	beholderBullet.speed = 5.0;
-
-	// Definindo info do vetor de beholderBullets
-	for( x = 0 ; x < 2 ; x++ )
-	{
-		beholderBulletV[a].snipRect.x = 0;
-		beholderBulletV[a].snipRect.y = 0;
-		beholderBulletV[a].snipRect.w = 40;
-		beholderBulletV[a].snipRect.h = 40;
-		beholderBulletV[a].presentedRect.w = 56;
-		beholderBulletV[a].presentedRect.h = 56; 
-		beholderBulletV[a].animationCycleCounter = 0;
-		beholderBulletV[a].activate = 0;
-	}
 	
 	// Informacoes do esqueleto (chaser)
 	skeleton.sprite = load_texture( "images/sprites/esqueleto55x55.png", l_window, l_renderer );
@@ -230,7 +196,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	skeleton.damage = 1;
 	
 	// Quantidade de inimigos
-	Character skeletonWave1[5];
+	Character skeletonWave1[4];
 	//Character skeletonWave2[10];
 
 	for( a = 0 ; a < 4 ; a++ )
@@ -256,7 +222,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	beholder.damage = 2;
 	
 	// Quantidade de inimigos
-	Character beholderWave1[5];
+	Character beholderWave1[4];
+	MagicProjectile beholderBulletWave1[4][3];
 	//Character beholderWave2[10];
 
 	for( a = 0 ; a < 4 ; a++ )
@@ -271,6 +238,69 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		beholderWave1[a].way = rand() %2 + 1;
 		beholderWave1[a].animationCycleCounter = 0;
 		beholderWave1[a].deathAnimationCounter = 0;
+	}
+
+	// Informacoes do projetil fireBall
+	fireBall.sprite = load_texture( "images/sprites/fireball40x40.png", l_window, l_renderer );
+	//fireBall.hitWall = load_sfx( "?" );
+	//fireBall.hitCharacter = load_sfx( "?" );
+	fireBall.damage = 50;
+	fireBall.speed = 8.0;
+
+	// Definindo info do vetor de fireBalls 
+	for( a = 0 ; a < 50 ; a++ )
+	{
+		fireBallV[0][a].snipRect.x = 0;
+		fireBallV[0][a].snipRect.y = 0;
+		fireBallV[0][a].snipRect.w = 40;
+		fireBallV[0][a].snipRect.h = 40;
+		fireBallV[0][a].presentedRect.w = 46;
+		fireBallV[0][a].presentedRect.h = 46; 
+		fireBallV[0][a].animationCycleCounter = 0;
+		fireBallV[0][a].activate = 0;
+	}
+
+	// Informacoes do projetil fireBall
+	necroShot.sprite = load_texture( "images/sprites/necroshot40x40.png", l_window, l_renderer );
+	//necroShot.hitWall = load_sfx( "?" );
+	//necroShot.hitCharacter = load_sfx( "?" );
+	necroShot.damage = 50;
+	necroShot.speed = 7.0;
+
+	// Definindo info do vetor de fireBalls 
+	for( a = 0 ; a < 20 ; a++ )
+	{
+		necroShotV[0][a].snipRect.x = 0;
+		necroShotV[0][a].snipRect.y = 0;
+		necroShotV[0][a].snipRect.w = 40;
+		necroShotV[0][a].snipRect.h = 40;
+		necroShotV[0][a].presentedRect.w = 46;
+		necroShotV[0][a].presentedRect.h = 46; 
+		necroShotV[0][a].animationCycleCounter = 0;
+		necroShotV[0][a].activate = 0;
+	}
+
+	// Informacoes do projetil do beholder
+	beholderBullet.sprite = load_texture( "images/sprites/beholdershot40x40.png", l_window, l_renderer );
+	//beholderBullet.hitWall = load_sfx( "?" );
+	//beholderBullet.hitCharacter = load_sfx( "?" );
+	beholderBullet.damage = 25;
+	beholderBullet.speed = 5.0;
+
+	// Definindo info do vetor de beholderBullets
+	for( x = 0 ; x < 4 ; x++ )
+	{
+		for( y = 0 ; y < 3 ; y++ )
+		{
+			beholderBulletWave1[x][y].snipRect.x = 0;
+			beholderBulletWave1[x][y].snipRect.y = 0;
+			beholderBulletWave1[x][y].snipRect.w = 40;
+			beholderBulletWave1[x][y].snipRect.h = 40;
+			beholderBulletWave1[x][y].presentedRect.w = 56;
+			beholderBulletWave1[x][y].presentedRect.h = 56; 
+			beholderBulletWave1[x][y].animationCycleCounter = 0;
+			beholderBulletWave1[x][y].activate = 0;
+		}
 	}
 
 	// Informacoes do colecionavel
@@ -318,165 +348,20 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	while( l_gameState == 3 )
 	{		
 		SDL_RenderCopy( l_renderer, firstMap.texture, &firstMap.snipRect, &firstMap.presentedRect );
-        	
-        // Onde o projetil sera mostrado na tela
-       	for( a = 0 ; a < 50 ; a++ )
+
+		// Sobre os tiros do jogador
+		for( x = 0 ; x < 1 ; x++ )
 		{
-			if( fireBallV[a].activate == 0 )
+			for( y = 0 ; y < 50 ; y++ )
 			{
-				fireBallV[a].presentedRect.x = 900;
-				fireBallV[a].presentedRect.y = 900;  
-				fireBallV[a].animationCycleCounter = 0;
-				SDL_RenderCopy( l_renderer, fireBall.sprite, &fireBallV[a].snipRect, &fireBallV[a].presentedRect );
+				projectile_update( &fireBallV[x][y], fireBall, 6, 4, l_window, l_renderer );
 			}
-
-			else if( fireBallV[a].activate == 1 )
+			for( y = 0 ; y < 20 ; y++ )
 			{
-				switch( fireBallV[a].direction )
-				{
-					case 'u':
-						fireBallV[a].presentedRect.y -= fireBall.speed;
-
-						if( fireBallV[a].animationCycleCounter%6 == 0 )
-						{
-							fireBallV[a].snipRect.x += 40;
-							if( fireBallV[a].snipRect.x < 600 || fireBallV[a].snipRect.x > 960 )
-							{
-								fireBallV[a].snipRect.x = 600;
-							}
-						}
-
-						fireBallV[a].animationCycleCounter++;
-						break;
-
-					case 'd':
-						fireBallV[a].presentedRect.y += fireBall.speed;
-						if( fireBallV[a].animationCycleCounter%6 == 0 )
-						{
-							fireBallV[a].snipRect.x += 40;
-							if( fireBallV[a].snipRect.x < 1800 || fireBallV[a].snipRect.x > 2160 )
-							{
-								fireBallV[a].snipRect.x = 1800;
-							}
-						}
-						fireBallV[a].animationCycleCounter++;
-						break;
-
-					case 'l':
-						fireBallV[a].presentedRect.x -= fireBall.speed;
-						if( fireBallV[a].animationCycleCounter%6 == 0 )
-						{
-							fireBallV[a].snipRect.x += 40;
-							if( fireBallV[a].snipRect.x < 1200 || fireBallV[a].snipRect.x > 1560 )
-							{
-								fireBallV[a].snipRect.x = 1200;
-							}
-						}
-						fireBallV[a].animationCycleCounter++;
-						break;
-
-					case 'r':
-						fireBallV[a].presentedRect.x += fireBall.speed;
-						if( fireBallV[a].animationCycleCounter%6 == 0 )
-						{
-							fireBallV[a].snipRect.x += 40;
-							if( fireBallV[a].snipRect.x < 0 || fireBallV[a].snipRect.x > 360 )
-							{
-								fireBallV[a].snipRect.x = 0;
-							}
-						}
-						fireBallV[a].animationCycleCounter++;
-						break;
-				}
-
-				if( fireBallV[a].presentedRect.y < 132 || fireBallV[a].presentedRect.x < 18 || (fireBallV[a].presentedRect.x+fireBallV[a].presentedRect.w) > 780 || (fireBallV[a].presentedRect.y+fireBallV[a].presentedRect.h) > 580 )
-				{
-					if( fireBallV[a].direction == 'u' )
-					{
-						fireBallV[a].snipRect.x = (1000-40);
-					}
-					else if( fireBallV[a].direction == 'd' )
-					{
-						fireBallV[a].snipRect.x = (2200-40);
-					}
-					else if( fireBallV[a].direction == 'l' )
-					{
-						fireBallV[a].snipRect.x = (1600-40);
-					}
-					else if( fireBallV[a].direction == 'r' )
-					{
-						fireBallV[a].snipRect.x = (400-40);
-					}
-					fireBallV[a].animationCycleCounter = 0;
-					fireBallV[a].activate = 2;
-				}
+				projectile_update( &necroShotV[x][y], necroShot, 6, 4, l_window, l_renderer );
 			}
-			
-			else if( fireBallV[a].activate == 2 )
-			{
-				if( fireBallV[a].direction == 'u' )
-				{
-					fireBallV[a].animationCycleCounter++;
-					if( fireBallV[a].animationCycleCounter%4 == 0 )
-					{
-						fireBallV[a].snipRect.x += 40;
-						if( fireBallV[a].snipRect.x > 1160 )
-						{
-							fireBallV[a].presentedRect.x = 900;
-							fireBallV[a].presentedRect.y = 900;  
-							fireBallV[a].animationCycleCounter = 0;
-						}
-					}
-				}
-
-				else if( fireBallV[a].direction == 'd' )
-				{
-					fireBallV[a].animationCycleCounter++;
-					if( fireBallV[a].animationCycleCounter%4 == 0 )
-					{
-						fireBallV[a].snipRect.x += 40;
-						if( fireBallV[a].snipRect.x > 2360 )
-						{
-							fireBallV[a].presentedRect.x = 900;
-							fireBallV[a].presentedRect.y = 900;  
-							fireBallV[a].animationCycleCounter = 0;
-						}
-					}
-				}
-
-				else if( fireBallV[a].direction == 'l' )
-				{
-					fireBallV[a].animationCycleCounter++;
-					if( fireBallV[a].animationCycleCounter%4 == 0 )
-					{
-						fireBallV[a].snipRect.x += 40;
-						if( fireBallV[a].snipRect.x > 1760 )
-						{
-							fireBallV[a].presentedRect.x = 900;
-							fireBallV[a].presentedRect.y = 900;  
-							fireBallV[a].animationCycleCounter = 0;
-						}
-					}
-				}
-
-				else if( fireBallV[a].direction == 'r' )
-				{
-					fireBallV[a].animationCycleCounter++;
-					if( fireBallV[a].animationCycleCounter%4 == 0 )
-					{
-						fireBallV[a].snipRect.x += 40;
-						if( fireBallV[a].snipRect.x > 560 )
-						{
-							fireBallV[a].presentedRect.x = 900;
-							fireBallV[a].presentedRect.y = 900;  
-							fireBallV[a].animationCycleCounter = 0;
-						}
-					}
-				}	
-			}
-			SDL_RenderCopy( l_renderer, fireBall.sprite, &fireBallV[a].snipRect, &fireBallV[a].presentedRect );
 		}
-
+					
         // Onde os inimigos aparecerao na tela
         for( a = 0 ; a < 4 ; a++ )
         {	
@@ -492,10 +377,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( circular_collision_detection( fireBallV[i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
+					if( circular_collision_detection( fireBallV[0][i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
 					{
 						skeletonWave1[a].healthPoints -= fireBall.damage;
-						fireBallV[i2].activate = 0;
+						fireBallV[0][i2].activate = 0;
 						if( skeletonWave1[a].healthPoints <= 0 )
 						{
 							skeletonWave1[a].activate = 2;
@@ -548,10 +433,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( circular_collision_detection( fireBallV[i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
+					if( circular_collision_detection( fireBallV[0][i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
 					{
 						beholderWave1[a].healthPoints -= fireBall.damage;
-						fireBallV[i2].activate = 0;
+						fireBallV[0][i2].activate = 0;
 						if( beholderWave1[a].healthPoints <= 0 )
 						{
 							beholderWave1[a].activate = 2;
@@ -679,29 +564,37 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					{
 						if( player.shootDelayCounter%20 == 0 )
 						{
-							fireBallV[i].snipRect.x = 0;
-							fireBallV[i].presentedRect.x = player.presentedRect.x;
-							fireBallV[i].presentedRect.y = player.presentedRect.y; 
-							fireBallV[i].direction = 'u';
-							fireBallV[i].activate = 1;
-							fireBallV[i].animationCycleCounter = 0;
-
-							i++;
-
-							if( i > 49 )
+							if( kindOfShot == 0 )
 							{
-								i = 0;
+								fireBallV[0][i].presentedRect.x = player.presentedRect.x;
+								fireBallV[0][i].presentedRect.y = player.presentedRect.y; 
+								fireBallV[0][i].direction = 'u';
+								fireBallV[0][i].activate = 1;
+
+								i++;
+
+								if( i > 49 )
+								{
+									i = 0;
+								}
 							}
 
-							if( player.animationCycleCounter%5 == 0 )
+							else if( kindOfShot == 1 )
 							{
-								player.snipRect.x += 80;
+								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
+								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
+								necroShotV[0][j].direction = 'u';
+								necroShotV[0][j].activate = 1;
+
+								j++;
+
+								if( j > 19 )
+								{
+									j = 0;
+								}
+
 							}
-							if( player.snipRect.x < 640 || player.snipRect.x > 800 )
-						   	{
-						   		player.snipRect.x = 640;
-							}
-							player.animationCycleCounter++;
+
 							player.shootDelayCounter = 1;
 						}
 					}
@@ -710,26 +603,30 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					{
 						if( player.shootDelayCounter%20 == 0 )
 						{
-							fireBallV[i].snipRect.x = 120;
-							fireBallV[i].presentedRect.x = player.presentedRect.x;
-							fireBallV[i].presentedRect.y = player.presentedRect.y; 
-							fireBallV[i].direction = 'd';
-							fireBallV[i].activate = 1;
-							fireBallV[i].animationCycleCounter = 0;
-							i++;
-							if( i > 49 )
+							if( kindOfShot == 0 )
 							{
-								i = 0;
+								fireBallV[0][i].presentedRect.x = player.presentedRect.x;
+								fireBallV[0][i].presentedRect.y = player.presentedRect.y; 
+								fireBallV[0][i].direction = 'd';
+								fireBallV[0][i].activate = 1;
+								i++;
+								if( i > 49 )
+								{
+									i = 0;
+								}
 							}
-							if( player.animationCycleCounter%5 == 0 )
+							else if( kindOfShot == 1 )
 							{
-								player.snipRect.x += 80;
+								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
+								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
+								necroShotV[0][j].direction = 'd';
+								necroShotV[0][j].activate = 1;
+								j++;
+								if( j > 19 )
+								{
+									i = 0;
+								}
 							}
-							if( player.snipRect.x < 880 || player.snipRect.x > 1040 )
-						   	{
-						   		player.snipRect.x = 880;
-							}
-							player.animationCycleCounter++;
 							player.shootDelayCounter = 1;
 						}
 					}
@@ -738,54 +635,62 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					{
 						if( player.shootDelayCounter%20 == 0 )
 						{
-							fireBallV[i].snipRect.x = 60;
-							fireBallV[i].presentedRect.x = player.presentedRect.x;
-							fireBallV[i].presentedRect.y = player.presentedRect.y; 
-							fireBallV[i].direction = 'l';
-							fireBallV[i].activate = 1;
-							fireBallV[i].animationCycleCounter = 0;
-							i++;
-							if( i > 49 )
+							if( kindOfShot == 0 )
 							{
-								i = 0;
+								fireBallV[0][i].presentedRect.x = player.presentedRect.x;
+								fireBallV[0][i].presentedRect.y = player.presentedRect.y; 
+								fireBallV[0][i].direction = 'l';
+								fireBallV[0][i].activate = 1;
+								i++;
+								if( i > 49 )
+								{
+									i = 0;
+								}
 							}
-							if( player.animationCycleCounter%5 == 0 )
+							else if( kindOfShot == 1 )
 							{
-								player.snipRect.x += 80;
+								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
+								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
+								necroShotV[0][j].direction = 'l';
+								necroShotV[0][j].activate = 1;
+								j++;
+								if( j > 19 )
+								{
+									i = 0;
+								}
 							}
-							if( player.snipRect.x < 1600 || player.snipRect.x > 1680 )
-						   	{
-						   		player.snipRect.x = 1600;
-							}
-							player.animationCycleCounter++;
 							player.shootDelayCounter = 1;
-						}	
+						}
 					}
 
 					else if( pressedKeyStates[SDL_SCANCODE_RIGHT] )
 					{
 						if( player.shootDelayCounter%20 == 0 )
 						{
-							//fireBallV[i].snipRect.x = 0;
-							fireBallV[i].presentedRect.x = player.presentedRect.x;
-							fireBallV[i].presentedRect.y = player.presentedRect.y; 
-							fireBallV[i].direction = 'r';
-							fireBallV[i].activate = 1;
-							//fireBallV[i].animationCycleCounter = 0;
-							i++;
-							if( i > 49 )
+							if( kindOfShot == 0 )
 							{
-								i = 0;
+								fireBallV[0][i].presentedRect.x = player.presentedRect.x;
+								fireBallV[0][i].presentedRect.y = player.presentedRect.y; 
+								fireBallV[0][i].direction = 'r';
+								fireBallV[0][i].activate = 1;
+								i++;
+								if( i > 49 )
+								{
+									i = 0;
+								}
 							}
-							/*if( player.animationCycleCounter%5 == 0 )
+							else if( kindOfShot == 1 )
 							{
-								player.snipRect.x += 80;
+								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
+								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
+								necroShotV[0][j].direction = 'r';
+								necroShotV[0][j].activate = 1;
+								j++;
+								if( j > 19 )
+								{
+									i = 0;
+								}
 							}
-							if( player.snipRect.x < 1280 || player.snipRect.x > 1360 )
-						   	{
-						   		player.snipRect.x = 1280;
-							}
-							player.animationCycleCounter++;*/
 							player.shootDelayCounter = 1;
 						}
 					}
@@ -817,6 +722,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						player.animationCycleCounter = 0;
 						vely = 0.0;
 					}
+				}
+			}
+
+			// Apertou para torcar de tiro
+			if( pressedKeyStates[SDL_SCANCODE_Q] ) 
+			{
+				kindOfShot++;
+				if( kindOfShot > 1 )
+				{
+					kindOfShot = 0;
 				}
 			}
 			
@@ -1054,6 +969,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	SDL_DestroyTexture( beholder.sprite );
 	SDL_DestroyTexture( beholder.spriteDeath );
 	SDL_DestroyTexture( fireBall.sprite );
+	SDL_DestroyTexture( necroShot.sprite );
 	SDL_DestroyTexture( beholderBullet.sprite );
 	SDL_DestroyTexture( greenCrystal.sprite);
 	player.sprite = NULL;
@@ -1064,6 +980,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	beholder.sprite = NULL;
 	beholder.spriteDeath = NULL;
 	fireBall.sprite = NULL;
+	necroShot.sprite = NULL;
 	beholderBullet.sprite = NULL;
 	greenCrystal.sprite = NULL;
 	
@@ -1390,5 +1307,161 @@ void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character p
 				enemy->animationCycleCounter++;		
 			}
 		}
-	} 
+	}
+} 
+
+void projectile_update( MagicProjectile* bullet, MagicProjectile typeOfBullet, int sCounter, int sDeath, SDL_Window* l_window, SDL_Renderer* l_renderer ) // 6 e 4 para a fireBall
+{
+	if( bullet->activate == 0 )
+	{
+		bullet->presentedRect.x = 900;
+		bullet->presentedRect.y = 900;  
+		bullet->animationCycleCounter = 0;
+		SDL_RenderCopy( l_renderer, typeOfBullet.sprite, &bullet->snipRect, &bullet->presentedRect );
+	}
+
+	else if( bullet->activate == 1 )
+	{
+		switch( bullet->direction )
+		{
+			case 'u':
+				bullet->presentedRect.y -= typeOfBullet.speed;
+
+				if( bullet->animationCycleCounter%sCounter == 0 )
+				{
+					bullet->snipRect.x += bullet->snipRect.w;
+					if( bullet->snipRect.x < (15*bullet->snipRect.w) || bullet->snipRect.x > (24*bullet->snipRect.w) )
+					{
+						bullet->snipRect.x = (15*bullet->snipRect.w);
+					}
+				}
+
+				bullet->animationCycleCounter++;
+				break;
+
+			case 'd':
+				bullet->presentedRect.y += typeOfBullet.speed;
+				if( bullet->animationCycleCounter%sCounter == 0 )
+				{
+					bullet->snipRect.x += bullet->snipRect.w;
+					if( bullet->snipRect.x < (45*bullet->snipRect.w) || bullet->snipRect.x > (54*bullet->snipRect.w) )
+					{
+						bullet->snipRect.x = (45*bullet->snipRect.w);
+					}
+				}
+				bullet->animationCycleCounter++;
+				break;
+
+			case 'l':
+				bullet->presentedRect.x -= typeOfBullet.speed;
+				if( bullet->animationCycleCounter%sCounter == 0 )
+				{
+					bullet->snipRect.x += bullet->snipRect.w;
+					if( bullet->snipRect.x < (30*bullet->snipRect.w) || bullet->snipRect.x > (39*bullet->snipRect.w) )
+					{
+						bullet->snipRect.x = (30*bullet->snipRect.w);
+					}
+				}
+				bullet->animationCycleCounter++;
+				break;
+
+			case 'r':
+				bullet->presentedRect.x += typeOfBullet.speed;
+				if( bullet->animationCycleCounter%sCounter == 0 )
+				{
+					bullet->snipRect.x += bullet->snipRect.w;
+					if( bullet->snipRect.x < 0 || bullet->snipRect.x > (9*bullet->snipRect.w) )
+					{
+						bullet->snipRect.x = 0;
+					}
+				}
+				bullet->animationCycleCounter++;
+				break;
+		}
+
+		if( bullet->presentedRect.y < 130 || bullet->presentedRect.x < 18 || (bullet->presentedRect.x+bullet->presentedRect.w) > 780 || (bullet->presentedRect.y+bullet->presentedRect.h) > 580 )
+		{
+			if( bullet->direction == 'u' )
+			{
+				bullet->snipRect.x = (24*bullet->snipRect.w);
+			}
+			else if( bullet->direction == 'd' )
+			{
+				bullet->snipRect.x = (54*bullet->snipRect.w);
+			}
+			else if( bullet->direction == 'l' )
+			{
+				bullet->snipRect.x = (39*bullet->snipRect.w);
+			}
+			else if( bullet->direction == 'r' )
+			{
+				bullet->snipRect.x = (9*bullet->snipRect.w);
+			}
+			bullet->animationCycleCounter = 0;
+			bullet->activate = 2;
+		}
+	}
+			
+	else if( bullet->activate == 2 )
+	{
+		if( bullet->direction == 'u' )
+		{
+			bullet->animationCycleCounter++;
+			if( bullet->animationCycleCounter%sDeath == 0 )
+			{
+				bullet->snipRect.x += bullet->snipRect.w;
+				if( bullet->snipRect.x > 1160 )
+				{
+					bullet->presentedRect.x = 900;
+					bullet->presentedRect.y = 900;  
+					bullet->animationCycleCounter = 0;
+				}
+			}
+		}
+		else if( bullet->direction == 'd' )
+		{
+			bullet->animationCycleCounter++;
+			if( bullet->animationCycleCounter%sDeath == 0 )
+			{
+				bullet->snipRect.x += bullet->snipRect.w;
+				if( bullet->snipRect.x > 2360 )
+				{
+					bullet->presentedRect.x = 900;
+					bullet->presentedRect.y = 900;  
+					bullet->animationCycleCounter = 0;
+				}
+			}
+		}
+
+		else if( bullet->direction == 'l' )
+		{
+			bullet->animationCycleCounter++;
+			if( bullet->animationCycleCounter%sDeath == 0 )
+			{
+				bullet->snipRect.x += bullet->snipRect.w;
+				if( bullet->snipRect.x > 1760 )
+				{
+					bullet->presentedRect.x = 900;
+					bullet->presentedRect.y = 900;  
+					bullet->animationCycleCounter = 0;
+				}
+			}
+		}
+
+		else if( bullet->direction == 'r' )
+		{
+			bullet->animationCycleCounter++;
+			if( bullet->animationCycleCounter%sDeath == 0 )
+			{
+				bullet->snipRect.x += bullet->snipRect.w;
+				if( bullet->snipRect.x > 560 )
+				{
+					bullet->presentedRect.x = 900;
+					bullet->presentedRect.y = 900;  
+					bullet->animationCycleCounter = 0;
+				}
+			}
+		}	
+	}
+	SDL_RenderCopy( l_renderer, typeOfBullet.sprite, &bullet->snipRect, &bullet->presentedRect );
 }

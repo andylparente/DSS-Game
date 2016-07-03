@@ -1,0 +1,9 @@
+0 ; 360 - right
+400 ; 560 - right explosion
+600 ; 960 - up
+1000 ; 1160 - up explosion
+1200 ; 1560 - left
+1600 ; 1760 - left explosion
+1800 ; 2160 - down
+2200 ; 2360 - down explosion
+

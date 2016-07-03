@@ -1,0 +1,4 @@
+direita de 0 a 160 (travar em 160)
+cima de 200 a 360 (travar em 360)
+esquerda de 400 a 560 (travar em 560)
+baixo de 600 a 760 (travar em 760)

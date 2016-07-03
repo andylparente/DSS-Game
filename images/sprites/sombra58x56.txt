@@ -1,0 +1,18 @@
+0 ; 58 - Down
+
+116 ; 174 - Up
+
+232 ; 290 ; 348 ; 406 - Standing
+
+464 ; 522 ; 580 - Up Shooting
+
+638 ; 696 ; 754 - Down Shooting
+
+812 ;  870 - Right
+
+928 ; 986 - Right Shooting
+
+1044 ; 1102 - Left
+
+1160 ; 1218 - Left Shooting
+

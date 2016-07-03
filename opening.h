@@ -67,7 +67,7 @@ int opening_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						l_texture = load_texture( "images/non_sprites/sdlcredits.png", l_window, l_renderer );
 						if( l_texture == NULL )
 						{
-							printf( "Unable to create texture from [images/non_sprites/empresa.png]! SDL Error: %s\n", SDL_GetError() );
+							printf( "Unable to create texture from [images/non_sprites/sdlcredits.png]! SDL Error: %s\n", SDL_GetError() );
 							l_gameState = -1;
 						}
 						

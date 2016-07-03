@@ -11,14 +11,33 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	int l_gameState = 2;
 	
     // Area onde a imagem fonte sera aplicada
-    SDL_Rect l_dstRect; 
-    l_dstRect.x = 100;
-    l_dstRect.y = 205;
-    l_dstRect.w = 35;
-    l_dstRect.h = 35;
+    SDL_Rect l_arrowPresentedRect; 
+    l_arrowPresentedRect.x = 20;
+    l_arrowPresentedRect.y = 222;
+    l_arrowPresentedRect.w = 30;
+    l_arrowPresentedRect.h = 30;
+
+    SDL_Rect l_optionPackPresentedRect; 
+    l_optionPackPresentedRect.x = 57;
+    l_optionPackPresentedRect.y = 220;
+    l_optionPackPresentedRect.w = 300;
+    l_optionPackPresentedRect.h = 270;
+
+    SDL_Rect l_optionSelectedPresentedRect; 
+    l_optionSelectedPresentedRect.x = 57;
+    l_optionSelectedPresentedRect.y = 220;
+    l_optionSelectedPresentedRect.w = 300;
+    l_optionSelectedPresentedRect.h = 45;
 
 	// Texturas que serao usadas
 	SDL_Texture* l_textureMenu = NULL;
+    SDL_Texture* l_textureOptionsFull = NULL;
+    SDL_Texture* l_textureOption1 = NULL;
+    SDL_Texture* l_textureOption2 = NULL;
+    SDL_Texture* l_textureOption3 = NULL;
+    SDL_Texture* l_textureOption4 = NULL;
+    SDL_Texture* l_textureOption5 = NULL;
+    SDL_Texture* l_textureOption6 = NULL;
 	SDL_Texture* l_textureArrow = NULL;
 
     // Musica que sera usada
@@ -50,7 +69,20 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
         else
         {
         	// Area onde a imagem fonte sera aplicada
-        	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_dstRect );
+        	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_arrowPresentedRect );
+
+            // Carrega as imagens de opcoes do menu
+            l_textureOptionsFull = load_texture( "images/non_sprites/opcoes300x270.png", l_window, l_renderer );
+            l_textureOption1 = load_texture( "images/non_sprites/op1.png", l_window, l_renderer );
+            l_textureOption2 = load_texture( "images/non_sprites/op2.png", l_window, l_renderer );
+            l_textureOption3 = load_texture( "images/non_sprites/op3.png", l_window, l_renderer );
+            l_textureOption4 = load_texture( "images/non_sprites/op4.png", l_window, l_renderer );
+            l_textureOption5 = load_texture( "images/non_sprites/op5.png", l_window, l_renderer );
+            l_textureOption6 = load_texture( "images/non_sprites/op6.png", l_window, l_renderer );
+
+            // Area onde a imagem fonte sera aplicada
+            SDL_RenderCopy( l_renderer, l_textureOptionsFull, NULL, &l_optionPackPresentedRect );
+            SDL_RenderCopy( l_renderer, l_textureOption1, NULL, &l_optionSelectedPresentedRect );
 
             // Apresenta as imagens
         	SDL_RenderPresent( l_renderer );
@@ -98,63 +130,115 @@ int main_menu_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
                     	break;
 
                     case SDLK_UP:
-                    	l_dstRect.y -= 42;
-                    	if ( l_dstRect.y < 205 )
+                    	l_arrowPresentedRect.y -= 45;
+                    	if ( l_arrowPresentedRect.y < 222 )
                     	{
-                    		l_dstRect.y = 373;
+                    		l_arrowPresentedRect.y = 447;
 						}
                         SDL_RenderClear( l_renderer );
                         SDL_RenderCopy( l_renderer, l_textureMenu, NULL, NULL );
-                    	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_dstRect );
-                    	SDL_RenderPresent( l_renderer );
+                        SDL_RenderCopy( l_renderer, l_textureOptionsFull, NULL, &l_optionPackPresentedRect );
+                    	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_arrowPresentedRect );
                     	break;
 
                 	case SDLK_DOWN:
-                		l_dstRect.y += 42;
-                    	if ( l_dstRect.y > 373 )
+                		l_arrowPresentedRect.y += 45;
+                    	if ( l_arrowPresentedRect.y > 447 )
                     	{
-                    		l_dstRect.y = 205;
+                    		l_arrowPresentedRect.y = 222;
 						}
                         SDL_RenderClear( l_renderer );
                         SDL_RenderCopy( l_renderer, l_textureMenu, NULL, NULL );
-                    	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_dstRect );
-                    	SDL_RenderPresent( l_renderer );
+                        SDL_RenderCopy( l_renderer, l_textureOptionsFull, NULL, &l_optionPackPresentedRect );
+                    	SDL_RenderCopy( l_renderer, l_textureArrow, NULL, &l_arrowPresentedRect );
                     	break;
                     	
                     case SDLK_RETURN:
-                    	switch( l_dstRect.y )
+                    	switch( l_arrowPresentedRect.y )
                     	{
-                    		case 205:
+                    		case 222:
                     			l_gameState = 3; //STATE_GAMEPLAY
                     			break;
                     			
-                    		case 247:
-                    			l_gameState = 6; //STATE_OPTIONS
-                    			break;
-                    			
-                    		case 289:
+                    		case 267:
                     			l_gameState = 4; //STATE_HIGHSCORE
                     			break;
                     			
-                    		case 331:
-                    			l_gameState = 5; //STATE_CREDITS
+                    		case 312:
+                    			l_gameState = 6; //STATE_OPTIONS
                     			break;
                     			
-                    		case 373:
+                    		case 357:
+                    			l_gameState = 5; //STATE_CREDITS
+                    			break;
+
+                            case 402:
+                                l_gameState = 8; //STATE_HISTORY
+                                break;
+                    			
+                    		case 447:
 								l_gameState = -1; //Quit
                     			break;
 						}
                     	break;
                 }
+
+                if( l_arrowPresentedRect.y == 222 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 0*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption1, NULL, &l_optionSelectedPresentedRect );
+                }
+                else if( l_arrowPresentedRect.y == 267 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 1*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption2, NULL, &l_optionSelectedPresentedRect );
+                }
+                else if( l_arrowPresentedRect.y == 312 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 2*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption3, NULL, &l_optionSelectedPresentedRect );
+                }
+                else if( l_arrowPresentedRect.y == 357 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 3*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption4, NULL, &l_optionSelectedPresentedRect );
+                }
+                else if( l_arrowPresentedRect.y == 402 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 4*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption5, NULL, &l_optionSelectedPresentedRect );
+                }
+                else if( l_arrowPresentedRect.y == 447 )
+                {
+                    l_optionSelectedPresentedRect.y = 220 + 5*45;
+                    SDL_RenderCopy( l_renderer, l_textureOption6, NULL, &l_optionSelectedPresentedRect );
+                }
             }
         }
+
+        SDL_RenderPresent( l_renderer );
 	}
 
     // Liberas imagens carregadas
     SDL_DestroyTexture( l_textureMenu );
     SDL_DestroyTexture( l_textureArrow );
+    SDL_DestroyTexture( l_textureOptionsFull );
+    SDL_DestroyTexture( l_textureOption1 );
+    SDL_DestroyTexture( l_textureOption2 );
+    SDL_DestroyTexture( l_textureOption3 );
+    SDL_DestroyTexture( l_textureOption4 );
+    SDL_DestroyTexture( l_textureOption5 );
+    SDL_DestroyTexture( l_textureOption6 );
+
     l_textureMenu = NULL;
     l_textureArrow = NULL;
+    l_textureOptionsFull = NULL;
+    l_textureOption1 = NULL;
+    l_textureOption2 = NULL;
+    l_textureOption3 = NULL;
+    l_textureOption4 = NULL;
+    l_textureOption5 = NULL;
+    l_textureOption6 = NULL;
     
     // Libera musica carregada
     Mix_FreeMusic( l_music );

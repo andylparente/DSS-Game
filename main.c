@@ -7,6 +7,10 @@
 #include "title_screen.h"
 #include "menu.h"
 #include "gameplay.h"
+#include "history.h"
+#include "credits.h"
+#include "highscore.h"
+#include "options.h"
 
 // Dimensoes constantes da tela
 const int SCREEN_WIDTH = 800;
@@ -21,6 +25,7 @@ int STATE_HIGHSCORE = 4;
 int STATE_CREDITS = 5;
 int STATE_OPTIONS = 6;
 int STATE_PAUSE = 7;
+int STATE_HISTORY = 8;
 
 // Iniciliza o estado do jogo como tela inicial
 int g_gameState = 2;
@@ -141,23 +146,24 @@ int main( int argc, char *argv[] )
 				break;
 
 			case 6:
-				//options_logic( g_window, g_renderer ); 
-				g_gameState = -1;
+				g_gameState = options_logic( g_window, g_renderer );
 				break;
 				
 			case 4:
-				//highscore_logic( g_window, g_renderer );
-				g_gameState = -1;
+				g_gameState = highscore_logic( g_window, g_renderer );
 				break;
 				
 			case 5:
-				//credits_logic( g_window, g_renderer );
-				g_gameState = -1;
+				g_gameState = credits_logic( g_window, g_renderer );
 				break;		
 
 			case 7:
-				//pause_logic( g_window, g_renderer );
+				//g_gameState = pause_logic( g_window, g_renderer );
 				g_gameState = -1;
+				break;
+
+			case 8:
+				g_gameState = history_logic( g_window, g_renderer );
 				break;
 
 			default:
@@ -174,84 +180,6 @@ int main( int argc, char *argv[] )
 
 	return close_game();
 }
-
-/*
-int gameplay_logic( int argc, char *argv[] )
-{
-	free_music_sfx( 'b' );
-	free_texture();
-
-	// "Velocidade" do sprites
-	float velx = 2.5;	
-	
-	load_Texture( "mapa.png" ); 
-	SDL_RenderClear( g_renderer );
-    SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-    
-    SDL_Event e;
-    
-    // Area que sera apresentada da imagem fonte
-	SDL_Rect l_srcRect;
-	l_srcRect.x = 0;
-	l_srcRect.y = 0;
-    l_srcRect.w = 80;
-    l_srcRect.h = 80;    
-    
-    // Area onde a imagem fonte sera aplicada
-	SDL_Rect l_dstRect;	
-	l_dstRect.x = SCREEN_WIDTH/2;
-  	l_dstRect.y = SCREEN_HEIGHT/2;
-   	l_dstRect.w = 80;
-   	l_dstRect.h = 80;
-	
-	load_Texture( "sprites/sombra100-60.png" );
-	SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
-	SDL_RenderPresent( g_renderer );
-
-	 while( g_gameState == 3 )
-	 {
-	 	while( SDL_PollEvent( &e ) != 0 )
-		{
-
-			free_texture();
-	        SDL_RenderClear( g_renderer );		
-			load_Texture( "mapa.png" );
-	        SDL_RenderCopy( g_renderer, g_texture, NULL, NULL );
-	        free_texture();
-			load_Texture( "sprites/sombra100-60.png" );
-	        SDL_RenderCopy( g_renderer, g_texture, &l_srcRect, &l_dstRect );
-	       	SDL_RenderPresent( g_renderer );
-		
-	    	if( e.type == SDL_KEYDOWN )
-			{
-	    		switch( e.key.keysym.sym )
-		   		{
-					case SDLK_RIGHT:
-	        			l_dstRect.x += velx;
-						break;
-	
-					case SDLK_LEFT: 
-						l_dstRect.x -= velx;
-						break;
-	
-					case SDLK_UP:
-						l_dstRect.y -= velx;
-						//l_srcRect.x -= l_srcRect.w;
-						break;
-	
-					case SDLK_DOWN:
-						l_dstRect.y += velx;
-						//l_srcRect.x -= l_srcRect.w; 
-						break;
-	
-					case SDLK_RETURN:
-						g_gameState = 5;                                     
-						break;
-           		}
-        	}
-        }
-	}
-} */
 
 int close_game()
 {

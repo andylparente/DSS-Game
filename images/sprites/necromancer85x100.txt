@@ -1,0 +1,11 @@
+0 ; 85 - down
+170 - down shooting
+
+255 ; 340 -  left
+425 - left shooting
+
+510 ; 595 - right
+680 - right shooting
+
+765 ; 850 - up
+935 - up shooting

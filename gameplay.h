@@ -89,6 +89,8 @@ typedef struct _map
 	SDL_Rect presentedRect;
 } Map;
 
+// Delimita onde os personagens opdem andar
+void room_limits( Character* character );
 
 // Funcao chamada para atualizar a posicao do inimigo que vai atras do jogador
 void chasing( Character* enemy, Character typeOfEnemy, Character player );
@@ -111,6 +113,7 @@ void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character p
 // Atualiza a animacao e posicao do projetil
 void projectile_update( MagicProjectile* bullet, MagicProjectile typeOfBullet, int sCounter, int sDeath, SDL_Window* l_window, SDL_Renderer* l_renderer );
 
+// Atualiza  animacao e posicao do necromancer
 void necromancer_ia( Character* enemy, Character typeOfEnemy, Character player, MagicProjectile* projectile, MagicProjectile* projectile2 );
 
 
@@ -132,6 +135,15 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Tipo de tiro que o jogador esta usando
 	int kindOfShot = 0;
 
+	// Barra de vida
+	SDL_Rect healthBarRect;
+	healthBarRect.x = 90;
+	healthBarRect.y = 40;
+	healthBarRect.w = 200;
+	healthBarRect.h = 50;
+	SDL_SetRenderDrawColor( l_renderer, 0, 255, 0, 255 );  
+	SDL_RenderFillRect( l_renderer, &healthBarRect );
+
 	// Flag para trocar o estado do jogo
 	int l_gameState= 3;
 
@@ -148,7 +160,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 	// Personagens que causam dano somente atraves do toque
 	Character skeleton;
-	//Character gatekeeper;
+	Character jellykiller;
 
 	// Tipos de projeteis/tiros
 	//MagicProjectile arcaneMissile;
@@ -197,7 +209,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Quantidade de tiros
 	//MagicProjectile arcaneMissileV[50];
 	MagicProjectile fireBallV[1][50];
-	MagicProjectile necroShotV[1][20];
+	//MagicProjectile necroShotV[1][20];
 	MagicProjectile iceSpearV[1][12];
 
 	MagicProjectile beholderBulletWave1[4][20];
@@ -214,7 +226,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	
 	// Quantidade de inimigos
 	Character skeletonWave1[4];
-	//Character skeletonWave2[10];
 
 	for( a = 0 ; a < 4 ; a++ )
 	{
@@ -227,6 +238,31 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		skeletonWave1[a].activate = 0;
 		skeletonWave1[a].animationCycleCounter = 0;
 		skeletonWave1[a].deathAnimationCounter = 0;
+	}
+
+	// Informacoes da agua-morta (chaser)
+	jellykiller.sprite = load_texture( "images/sprites/aguamorta60x60.png", l_window, l_renderer );
+	jellykiller.spriteDeath = load_texture( "images/sprites/aguamortadeath.png", l_window, l_renderer );
+	//jellykiller.gotHit = load_sfx( "?" );
+	//jellykiller.deathSound = load_sfx( "?" );
+	jellykiller.healthPoints = 100;
+	jellykiller.speed = 2.5;
+	jellykiller.damage = 1;
+	
+	// Quantidade de inimigos
+	Character jellykillerWave1[4];
+
+	for( a = 0 ; a < 4 ; a++ )
+	{
+		jellykillerWave1[a].snipRect.x = 0;
+		jellykillerWave1[a].snipRect.y = 0;
+		jellykillerWave1[a].snipRect.h = 60;
+		jellykillerWave1[a].snipRect.w = 60;
+		jellykillerWave1[a].presentedRect.w = 56;
+		jellykillerWave1[a].presentedRect.h = 56; 
+		jellykillerWave1[a].activate = 0;
+		jellykillerWave1[a].animationCycleCounter = 0;
+		jellykillerWave1[a].deathAnimationCounter = 0;
 	}
 
 	// Informacoes do beholder (shooter)
@@ -330,10 +366,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	necroShot.sprite = load_texture( "images/sprites/necroshot40x40.png", l_window, l_renderer );
 	//necroShot.hitWall = load_sfx( "?" );
 	//necroShot.hitCharacter = load_sfx( "?" );
-	necroShot.damage = 100;
+	necroShot.damage = 35;
 	necroShot.speed = 2.0;
 
-	// Definindo vetor de necroShot
+	// Definindo info do vetor de necroShots
 	for( x = 0 ; x < 4 ; x++ )
 	{
 		for( y = 0 ; y < 30 ; y++ )
@@ -342,8 +378,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			necromancerBulletWave1[x][y].snipRect.y = 0;
 			necromancerBulletWave1[x][y].snipRect.w = 40;
 			necromancerBulletWave1[x][y].snipRect.h = 40;
-			necromancerBulletWave1[x][y].presentedRect.w = 76;
-			necromancerBulletWave1[x][y].presentedRect.h = 76;
+			necromancerBulletWave1[x][y].presentedRect.w = 72;
+			necromancerBulletWave1[x][y].presentedRect.h = 72;
 			necromancerBulletWave1[x][y].animationCycleCounter = 0;
 			necromancerBulletWave1[x][y].activate = 0;
 		}
@@ -423,15 +459,11 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		{
 			for( y = 0 ; y < 50 ; y++ )
 			{
-				projectile_update( &fireBallV[x][y], fireBall, 6, 4, l_window, l_renderer );
-			}
-			for( y = 0 ; y < 20 ; y++ )
-			{
-				projectile_update( &necroShotV[x][y], necroShot, 6, 4, l_window, l_renderer );
+				projectile_update( &fireBallV[x][y], fireBall, 5, 1, l_window, l_renderer );
 			}
 			for( y = 0 ; y < 12 ; y++ )
 			{
-				projectile_update( &iceSpearV[x][y], iceSpear, 6, 4, l_window, l_renderer );
+				projectile_update( &iceSpearV[x][y], iceSpear, 5, 1, l_window, l_renderer );
 			}
 		}
 
@@ -440,7 +472,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		{
 			for( y = 0 ; y < 20 ; y++ )
 			{
-				projectile_update( &beholderBulletWave1[x][y], beholderBullet, 8, 4, l_window, l_renderer );
+				projectile_update( &beholderBulletWave1[x][y], beholderBullet, 8, 2, l_window, l_renderer );
 
 				if( beholderBulletWave1[x][y].activate == 1 )
 				{
@@ -454,7 +486,15 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 			for( y = 0 ; y < 30 ; y++ )
 			{
-				projectile_update( &necromancerBulletWave1[x][y], necroShot, 5, 5, l_window, l_renderer );
+				projectile_update( &necromancerBulletWave1[x][y], necroShot, 5, 2, l_window, l_renderer );
+				if( necromancerBulletWave1[x][y].activate == 1 )
+				{
+					if( circular_collision_detection( player.presentedRect, necromancerBulletWave1[x][y].presentedRect, 3 ) != 0 )
+					{
+						player.healthPoints -= necroShot.damage;
+						necromancerBulletWave1[x][y].activate = 2;
+					}
+				}
 
 			}
 		}
@@ -547,36 +587,51 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				// Esqueleto sofre dano pelos projeteis do jogador
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( circular_collision_detection( fireBallV[0][i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
+					if( fireBallV[0][i2].activate == 1 )
 					{
-						skeletonWave1[a].healthPoints -= fireBall.damage;
-						fireBallV[0][i2].activate = 0;
-						if( skeletonWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( fireBallV[0][i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
 						{
-							skeletonWave1[a].activate = 2;
+							skeletonWave1[a].healthPoints -= fireBall.damage;
+							fireBallV[0][i2].activate = 2;
+							if( skeletonWave1[a].healthPoints <= 0 )
+							{
+								skeletonWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
-				for ( i2 = 0 ; i2 < 20 ; i2++ )
+				for ( i2 = 0 ; i2 < 12 ; i2++ )
 				{
-					if( circular_collision_detection( necroShotV[0][i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
+					if( iceSpearV[0][i2].activate == 1 )
 					{
-						skeletonWave1[a].healthPoints -= necroShot.damage;
-						necroShotV[0][i2].activate = 0;
-						if( skeletonWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( iceSpearV[0][i2].presentedRect, skeletonWave1[a].presentedRect, 0 ) != 0 )
 						{
-							skeletonWave1[a].activate = 2;
+							skeletonWave1[a].healthPoints -= iceSpear.damage;
+							iceSpearV[0][i2].activate = 2;
+							if( skeletonWave1[a].healthPoints <= 0 )
+							{
+								skeletonWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
-
 				if( player.healthPoints > 0 )
 				{
 					circular_sprite_arrangement( skeletonWave1[a].presentedRect, &player.presentedRect );
 				}
+				room_limits( &skeletonWave1[a] );
 
 				SDL_RenderCopy( l_renderer, skeleton.sprite, &skeletonWave1[a].snipRect, &skeletonWave1[a].presentedRect );	
 			}
+			if( skeletonWave1[a].activate == 3 )
+        	{
+        		skeletonWave1[a].presentedRect.x = 900;
+        		skeletonWave1[a].presentedRect.y = 900;
+        		skeletonWave1[a].snipRect.x = 0;
+        		skeletonWave1[a].healthPoints = skeleton.healthPoints;
+        		skeletonWave1[a].animationCycleCounter = 0;
+        		skeletonWave1[a].deathAnimationCounter = 0;
+        	}
 			// Animacao de morte do esqueleto
 			if( skeletonWave1[a].activate == 2 )
 			{
@@ -591,14 +646,124 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				{
 					skeletonWave1[a].snipRect.x += 55;
 				}
+				room_limits( &skeletonWave1[a] );
 
 				SDL_RenderCopy( l_renderer, skeleton.spriteDeath, &skeletonWave1[a].snipRect, &skeletonWave1[a].presentedRect );
 
 				if( skeletonWave1[a].deathAnimationCounter == 120 )
 				{
-					skeletonWave1[a].activate = 0;
+					skeletonWave1[a].activate = 3;
 				}
 			}	
+        }
+
+        for( a = 0 ; a < 4 ; a++ ) // Jellykiller
+        {
+        	if( jellykillerWave1[a].activate == 0 )
+        	{
+        		jellykillerWave1[a].presentedRect.x = 900;
+        		jellykillerWave1[a].presentedRect.y = 900;
+        		jellykillerWave1[a].snipRect.x = 0;
+        		jellykillerWave1[a].healthPoints = jellykiller.healthPoints;
+        		jellykillerWave1[a].animationCycleCounter = 0;
+        		jellykillerWave1[a].deathAnimationCounter = 0;
+        	}	
+        	// Sobre o agua-morta
+           	if( jellykillerWave1[a].activate == 1 )
+           	{
+           		// Agua-morta vai ate ao jogador
+				chasing( &jellykillerWave1[a], jellykiller, player );
+
+				// Ciclo de animacao
+				jellykillerWave1[a].animationCycleCounter++;
+           		if( jellykillerWave1[a].animationCycleCounter%8 == 0 )
+           		{
+           			jellykillerWave1[a].snipRect.x += 60;
+           		}
+           		if( jellykillerWave1[a].snipRect.x < 0 || jellykillerWave1[a].snipRect.x > 300 )
+           		{
+					jellykillerWave1[a].snipRect.x = 0;           			
+           		}
+
+				// Agua-morta ataca o jogador ao enconsta-lo
+				if ( circular_collision_detection( player.presentedRect, jellykillerWave1[a].presentedRect, 5 ) != 0 )
+				{
+					player.healthPoints -= jellykiller.damage;
+					jellykillerWave1[a].snipRect.x = 360;
+				}
+
+				// Agua-morta sofre dano pelos projeteis do jogador
+				for ( i2 = 0 ; i2 < 50 ; i2++ )
+				{
+					if( fireBallV[0][i2].activate == 1 )
+					{
+						if( circular_collision_detection( fireBallV[0][i2].presentedRect, jellykillerWave1[a].presentedRect, 0 ) != 0 )
+						{
+							jellykillerWave1[a].healthPoints -= fireBall.damage;
+							fireBallV[0][i2].activate = 2;
+							if( jellykillerWave1[a].healthPoints <= 0 )
+							{
+								jellykillerWave1[a].activate = 2;
+							}
+						}
+					}				
+				}
+				for ( i2 = 0 ; i2 < 12 ; i2++ )
+				{
+					if( iceSpearV[0][i2].activate == 1 )
+					{
+						if( circular_collision_detection( iceSpearV[0][i2].presentedRect, jellykillerWave1[a].presentedRect, 0 ) != 0 )
+						{
+							jellykillerWave1[a].healthPoints -= iceSpear.damage;
+							iceSpearV[0][i2].activate = 2;
+							if( jellykillerWave1[a].healthPoints <= 0 )
+							{
+								jellykillerWave1[a].activate = 2;
+							}
+						}
+					}				
+				}
+				if( player.healthPoints > 0 )
+				{
+					circular_sprite_arrangement( jellykillerWave1[a].presentedRect, &player.presentedRect );
+				}
+				room_limits( &jellykillerWave1[a] );
+
+				SDL_RenderCopy( l_renderer, jellykiller.sprite, &jellykillerWave1[a].snipRect, &jellykillerWave1[a].presentedRect );	
+			}
+			if( jellykillerWave1[a].activate == 3 )
+        	{
+        		jellykillerWave1[a].presentedRect.x = 900;
+        		jellykillerWave1[a].presentedRect.y = 900;
+        		jellykillerWave1[a].snipRect.x = 0;
+        		jellykillerWave1[a].healthPoints = jellykiller.healthPoints;
+        		jellykillerWave1[a].animationCycleCounter = 0;
+        		jellykillerWave1[a].deathAnimationCounter = 0;
+        	}
+			// Animacao de morte do agua-morta
+			if( jellykillerWave1[a].activate == 2 )
+			{
+				if( jellykillerWave1[a].deathAnimationCounter == 0)
+				{
+					jellykillerWave1[a].snipRect.x = 0;
+				}
+
+				jellykillerWave1[a].deathAnimationCounter++;
+
+				if( jellykillerWave1[a].deathAnimationCounter%12 == 0 )
+				{
+					jellykillerWave1[a].snipRect.x += 60;
+				}
+				room_limits( &jellykillerWave1[a] );
+
+				SDL_RenderCopy( l_renderer, jellykiller.spriteDeath, &jellykillerWave1[a].snipRect, &jellykillerWave1[a].presentedRect );
+
+				if( jellykillerWave1[a].deathAnimationCounter == 156 )
+				{
+					jellykillerWave1[a].activate = 3;
+				}
+			}
+
         }
 
         for( a = 0 ; a < 4 ; a++ ) // Beholder
@@ -627,37 +792,31 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				// Beholder sofre dano pelos projeteis do jogador
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( circular_collision_detection( fireBallV[0][i2].presentedRect, beholderWave1[a].presentedRect, 10 ) != 0 )
+					if( fireBallV[0][i2].activate == 1 )
 					{
-						beholderWave1[a].healthPoints -= fireBall.damage;
-						fireBallV[0][i2].activate = 0;
-						if( beholderWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( fireBallV[0][i2].presentedRect, beholderWave1[a].presentedRect, 10 ) != 0 )
 						{
-							beholderWave1[a].activate = 2;
-						}
-					}				
-				}
-				for ( i2 = 0 ; i2 < 20 ; i2++ )
-				{
-					if( circular_collision_detection( necroShotV[0][i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
-					{
-						beholderWave1[a].healthPoints -= necroShot.damage;
-						necroShotV[0][i2].activate = 0;
-						if( beholderWave1[a].healthPoints <= 0 )
-						{
-							beholderWave1[a].activate = 2;
+							beholderWave1[a].healthPoints -= fireBall.damage;
+							fireBallV[0][i2].activate = 2;
+							if( beholderWave1[a].healthPoints <= 0 )
+							{
+								beholderWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
 				for ( i2 = 0 ; i2 < 12 ; i2++ )
 				{
-					if( circular_collision_detection( iceSpearV[0][i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
+					if( iceSpearV[0][i2].activate == 1 )
 					{
-						beholderWave1[a].healthPoints -= iceSpear.damage;
-						iceSpearV[0][i2].activate = 0;
-						if( beholderWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( iceSpearV[0][i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
 						{
-							beholderWave1[a].activate = 2;
+							beholderWave1[a].healthPoints -= iceSpear.damage;
+							iceSpearV[0][i2].activate = 2;
+							if( beholderWave1[a].healthPoints <= 0 )
+							{
+								beholderWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
@@ -669,6 +828,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				SDL_RenderCopy( l_renderer, beholder.sprite, &beholderWave1[a].snipRect, &beholderWave1[a].presentedRect );	
 			}
+			if( beholderWave1[a].activate == 3 )
+        	{
+        		beholderWave1[a].presentedRect.x = 900;
+        		beholderWave1[a].presentedRect.y = 900;
+        		beholderWave1[a].snipRect.x = 0;
+        		beholderWave1[a].healthPoints = beholder.healthPoints;
+        		beholderWave1[a].animationCycleCounter = 0;
+        		beholderWave1[a].deathAnimationCounter = 0;
+        		beholderWave1[a].bulletNumber = 0;
+        	}
 			// Animacao de morte do beholder
 			if( beholderWave1[a].activate == 2 )
 			{
@@ -688,7 +857,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				
 				if( beholderWave1[a].deathAnimationCounter == 160 )
 				{
-					beholderWave1[a].activate = 0;
+					beholderWave1[a].activate = 3;
 				}
 			}	
         }
@@ -719,37 +888,31 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				// Necromancer sofre dano pelos projeteis do jogador
 				for ( i2 = 0 ; i2 < 50 ; i2++ )
 				{
-					if( circular_collision_detection( fireBallV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 10 ) != 0 )
+					if( fireBallV[0][i2].activate == 1 )
 					{
-						necromancerWave1[a].healthPoints -= fireBall.damage;
-						fireBallV[0][i2].activate = 0;
-						if( necromancerWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( fireBallV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 10 ) != 0 )
 						{
-							necromancerWave1[a].activate = 2;
-						}
-					}				
-				}
-				for ( i2 = 0 ; i2 < 20 ; i2++ )
-				{
-					if( circular_collision_detection( necroShotV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 0 ) != 0 )
-					{
-						necromancerWave1[a].healthPoints -= necroShot.damage;
-						necroShotV[0][i2].activate = 0;
-						if( necromancerWave1[a].healthPoints <= 0 )
-						{
-							necromancerWave1[a].activate = 2;
+							necromancerWave1[a].healthPoints -= fireBall.damage;
+							fireBallV[0][i2].activate = 2;
+							if( necromancerWave1[a].healthPoints <= 0 )
+							{
+								necromancerWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
 				for ( i2 = 0 ; i2 < 12 ; i2++ )
 				{
-					if( circular_collision_detection( iceSpearV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 0 ) != 0 )
+					if( iceSpearV[0][i2].activate == 1 )
 					{
-						necromancerWave1[a].healthPoints -= iceSpear.damage;
-						iceSpearV[0][i2].activate = 0;
-						if( necromancerWave1[a].healthPoints <= 0 )
+						if( circular_collision_detection( iceSpearV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 0 ) != 0 )
 						{
-							necromancerWave1[a].activate = 2;
+							necromancerWave1[a].healthPoints -= iceSpear.damage;
+							iceSpearV[0][i2].activate = 2;
+							if( necromancerWave1[a].healthPoints <= 0 )
+							{
+								necromancerWave1[a].activate = 2;
+							}
 						}
 					}				
 				}
@@ -761,6 +924,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				SDL_RenderCopy( l_renderer, necromancer.sprite, &necromancerWave1[a].snipRect, &necromancerWave1[a].presentedRect );	
 			}
+			if( necromancerWave1[a].activate == 3 )
+        	{
+        		necromancerWave1[a].presentedRect.x = 900;
+        		necromancerWave1[a].presentedRect.y = 900;
+        		necromancerWave1[a].snipRect.x = 0;
+        		necromancerWave1[a].healthPoints = necromancer.healthPoints;
+        		necromancerWave1[a].animationCycleCounter = 0;
+        		necromancerWave1[a].deathAnimationCounter = 0;
+        		necromancerWave1[a].bulletNumber = 0;
+        	}
 			// Animacao de morte do necromancer
 			if( necromancerWave1[a].activate == 2 )
 			{
@@ -773,14 +946,14 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 				SDL_RenderCopy( l_renderer, necromancer.spriteDeath, &necromancerWave1[a].snipRect, &necromancerWave1[a].presentedRect );
 
-				if( necromancerWave1[a].deathAnimationCounter%25 == 0 )
+				if( necromancerWave1[a].deathAnimationCounter%22 == 0 )
 				{
 					necromancerWave1[a].snipRect.x += 85;
 				}
 				
 				if( necromancerWave1[a].deathAnimationCounter == 150 )
 				{
-					necromancerWave1[a].activate = 0;
+					necromancerWave1[a].activate = 3;
 				}
 			}	
         }
@@ -832,7 +1005,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					// Esqueletos aparecem
 					if( e.key.keysym.sym == SDLK_RETURN )
 					{
-						/*for( a = 0 ; a < 4 ; a++ )
+						for( a = 0 ; a < 4 ; a++ )
 						{
 							skeletonWave1[a].activate = 1;
 						}
@@ -841,7 +1014,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						passing_through_door( 'u', &skeletonWave1[2] );
 						passing_through_door( 'd', &skeletonWave1[3] );
 						
-						for( a = 0 ; a < 4 ; a++ )
+						/*for( a = 0 ; a < 4 ; a++ )
 						{
 							beholderWave1[a].activate = 1;
 						}
@@ -850,14 +1023,23 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						passing_through_door( 'u', &beholderWave1[2] );
 						passing_through_door( 'd', &beholderWave1[3] );*/
 
-						for( a = 0 ; a < 4 ; a++ )
+						/*for( a = 0 ; a < 4 ; a++ )
 						{
 							necromancerWave1[a].activate = 1;
 						}
 						passing_through_door( 'l', &necromancerWave1[0] );
 						passing_through_door( 'r', &necromancerWave1[1] );
 						passing_through_door( 'u', &necromancerWave1[2] );
-						passing_through_door( 'd', &necromancerWave1[3] );
+						passing_through_door( 'd', &necromancerWave1[3] );*/
+
+						/*for( a = 0 ; a < 4 ; a++ )
+						{
+							jellykillerWave1[a].activate = 1;
+						}
+						//passing_through_door( 'l', &jellykillerWave1[0] );
+						//passing_through_door( 'r', &jellykillerWave1[1] );
+						//passing_through_door( 'u', &jellykillerWave1[2] );
+						//passing_through_door( 'd', &jellykillerWave1[3] );*/
 					}
 
 					// Itens aparecem
@@ -1119,7 +1301,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			player.presentedRect.y += vely;
 
 			// Se os esqueletos estao desativados e possivel sair da sala
-			if( skeletonWave1[0].activate == 0 && skeletonWave1[1].activate == 0 && skeletonWave1[2].activate == 0 && skeletonWave1[3].activate == 0 )
+			if( jellykillerWave1[0].activate == 0 && jellykillerWave1[1].activate == 0 && jellykillerWave1[2].activate == 0 && jellykillerWave1[3].activate == 0 )
 			{
 				// Permite passar pelas portas
 				if( player.presentedRect.x <= 19 )
@@ -1207,25 +1389,32 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 			else
 			{
-				if( player.presentedRect.x <= 19 )
-				{
-					player.presentedRect.x = 20;
-				}
-				else if( player.presentedRect.x+player.presentedRect.w >= 780 )
-				{
-					player.presentedRect.x = 779 - player.presentedRect.w;
-				}
-				if( player.presentedRect.y <= 129 )
-				{
-					player.presentedRect.y = 130;
-				}
-				else if( player.presentedRect.y+player.presentedRect.h >= 580 )
-				{
-					player.presentedRect.y = 579 - player.presentedRect.h;
-				}
+				room_limits( &player );
 			}
 
 			SDL_RenderCopy( l_renderer, player.sprite, &player.snipRect, &player.presentedRect );
+
+			// Sobre a barra de vida
+			healthBarRect.w = 2*player.healthPoints;
+
+			if( healthBarRect.w >= 160 )
+			{
+				SDL_SetRenderDrawColor( l_renderer, 0, 255, 0, 255 );
+			}
+
+			else if( healthBarRect.w < 120 && healthBarRect.w >= 60 )
+			{
+				SDL_SetRenderDrawColor( l_renderer, 255, 255, 0, 255 );
+			}
+
+			else if( healthBarRect.w < 60 )
+			{
+				SDL_SetRenderDrawColor( l_renderer, 255, 0, 0, 255 );
+			}
+
+
+			  
+			SDL_RenderFillRect( l_renderer, &healthBarRect );
 		}
 
 		// Animacao de morte do jogador
@@ -1282,6 +1471,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	SDL_DestroyTexture( firstMap.texture );
 	SDL_DestroyTexture( skeleton.sprite );
 	SDL_DestroyTexture( skeleton.spriteDeath );
+	SDL_DestroyTexture( jellykiller.sprite );
+	SDL_DestroyTexture( jellykiller.spriteDeath );
 	SDL_DestroyTexture( beholder.sprite );
 	SDL_DestroyTexture( beholder.spriteDeath );
 	SDL_DestroyTexture( necromancer.sprite );
@@ -1299,6 +1490,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	firstMap.texture = NULL;
 	skeleton.sprite = NULL;
 	skeleton.spriteDeath = NULL;
+	jellykiller.sprite = NULL;
+	jellykiller.spriteDeath = NULL;
 	beholder.sprite = NULL;
 	beholder.spriteDeath = NULL;
 	necromancer.sprite = NULL;
@@ -1318,6 +1511,26 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 // FFFFFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNCOES ESTAO AKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // FFFFFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNCOES ESTAO AKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // FFFFFFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNCOES ESTAO AKI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+void room_limits( Character* character )
+{	
+	if( character->presentedRect.x <= 19 )
+	{
+		character->presentedRect.x = 20;
+	}
+	else if( character->presentedRect.x+character->presentedRect.w >= 780 )
+	{
+		character->presentedRect.x = 779 - character->presentedRect.w;
+	}
+	if( character->presentedRect.y <= 129 )
+	{
+		character->presentedRect.y = 130;
+	}
+	else if( character->presentedRect.y+character->presentedRect.h >= 580 )
+	{
+		character->presentedRect.y = 579 - character->presentedRect.h;
+	}
+}
 
 void chasing( Character* enemy, Character typeOfEnemy, Character player )
 {
@@ -1372,9 +1585,9 @@ int circular_collision_detection( SDL_Rect aPR, SDL_Rect bPR, int playerHitBoxCo
 
 void circular_sprite_arrangement( SDL_Rect enemyPR, SDL_Rect* playerPR )
 {
-	int occur;
+	int occur, occur2;
 	// Raio do sprite
-	float aRadius = (float)enemyPR.w/2.0;
+	float aRadius = (float)enemyPR.w/2.0 - 10;
 	float bRadius = (float)playerPR->w/2.0;
 
 	// Definindo a coordenada X do centro do sprite a
@@ -1406,29 +1619,33 @@ void circular_sprite_arrangement( SDL_Rect enemyPR, SDL_Rect* playerPR )
 		if( playerPR->y < enemyPR.y )
 		{
 			playerPR->y--;
-			occur = 3;
+			occur2 = 1;
 		}
 
 		else if( playerPR->y > enemyPR.y )
 		{
 			playerPR->y++;
-			occur = 4;
+			occur2 = 2;
 		}
 	}
 
 	switch( occur )
 	{
 		case 1:
-			playerPR->x -= 10;
+			playerPR->x -= 25;
 			break;
 		case 2:
-			playerPR->x += 10;
+			playerPR->x += 25;
 			break;
-		case 3:
-			playerPR->y -= 10;
+	}
+
+	switch( occur2 )
+	{
+		case 1:
+			playerPR->y -= 25;
 			break;
-		case 4:
-			playerPR->y += 10;
+		case 2:
+			playerPR->y += 25;
 			break;
 	}
 }

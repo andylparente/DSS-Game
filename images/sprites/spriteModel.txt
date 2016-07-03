@@ -1,0 +1,11 @@
+00*w ; 09*w - right
+10*w ; 14*w - right explosion
+
+15*w ; 24*w - up
+25*w ; 29*w - up explosion
+
+30*w ; 39*w - left
+40*w ; 44*w - left explosion
+
+45*w ; 54*w - down
+55*w ; 59*w - down explosion

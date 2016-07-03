@@ -1,0 +1,4 @@
+direita x = 0 até 200 (explosão em 80)
+cima x = 240 até 440 (explosão em 320)
+esquerda x = 480 (explosao em 560)
+baixo x = 720 ( explosao em 800)

@@ -106,10 +106,12 @@ void scroll_map_animation( char c, Map* map, Character* player );
 void passing_through_door( char doorLocation, Character* enemy );
 
 // Inteligencia artificial do beholder
-void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player, int delayShoot,  MagicProjectile* projectile );
+void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player,  MagicProjectile* projectile );
 
 // Atualiza a animacao e posicao do projetil
 void projectile_update( MagicProjectile* bullet, MagicProjectile typeOfBullet, int sCounter, int sDeath, SDL_Window* l_window, SDL_Renderer* l_renderer );
+
+void necromancer_ia( Character* enemy, Character typeOfEnemy, Character player, MagicProjectile* projectile, MagicProjectile* projectile2 );
 
 
 // UHUUUUUUUUUUUUUUUUUHUHUHUUHUHUUUUUUUUUUUUUUUUUU *_* HHHHHHHHHHHHHHHHHHHHUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUHUHUHUUUUUUUUUUUUUUUUUUUUUUUUUU *_* UUUUUUUUUUUHUHUHUHUUUUHUHU //
@@ -141,7 +143,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	// Personagens que atiram coisas (inclui o jogador)
 	Character player;
 	Character beholder;
-	//Character necromancer;
+	Character necromancer;
 	//Character demonBoss;
 
 	// Personagens que causam dano somente atraves do toque
@@ -199,6 +201,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	MagicProjectile iceSpearV[1][12];
 
 	MagicProjectile beholderBulletWave1[4][20];
+	MagicProjectile necromancerBulletWave1[4][30];
 	
 	// Informacoes do esqueleto (chaser)
 	skeleton.sprite = load_texture( "images/sprites/esqueleto55x55.png", l_window, l_renderer );
@@ -242,8 +245,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	{
 		beholderWave1[a].snipRect.x = 0;
 		beholderWave1[a].snipRect.y = 0;
-		beholderWave1[a].snipRect.h = 90;
 		beholderWave1[a].snipRect.w = 90;
+		beholderWave1[a].snipRect.h = 90;
 		beholderWave1[a].presentedRect.w = 110;
 		beholderWave1[a].presentedRect.h = 110; 
 		beholderWave1[a].activate = 0;
@@ -253,6 +256,35 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		beholderWave1[a].animationCycleCounter = 0;
 		beholderWave1[a].deathAnimationCounter = 0;
 	}
+
+	// Informacoes do necromancer (shooter)
+	necromancer.sprite = load_texture( "images/sprites/necromancer85x100.png", l_window, l_renderer );
+	necromancer.spriteDeath = load_texture( "images/sprites/necrodeath.png", l_window, l_renderer );
+	//necromancer.gotHit = load_sfx( "?" );
+	//necromancer.deathSound = load_sfx( "?" );
+	necromancer.healthPoints = 250;
+	necromancer.speed = 3.0;
+	necromancer.damage = 2;
+	
+	// Quantidade de inimigos
+	Character necromancerWave1[4];
+	//Character necromancerWave2[10];
+	for( a = 0 ; a < 4 ; a++ )
+	{
+		necromancerWave1[a].snipRect.x = 0;
+		necromancerWave1[a].snipRect.y = 0;
+		necromancerWave1[a].snipRect.w = 85;
+		necromancerWave1[a].snipRect.h = 100;
+		necromancerWave1[a].presentedRect.w = 100;
+		necromancerWave1[a].presentedRect.h = 100; 
+		necromancerWave1[a].activate = 0;
+		necromancerWave1[a].shootDelayCounter = 0;
+		necromancerWave1[a].bulletNumber = 0;
+		necromancerWave1[a].way = rand() % 4;
+		necromancerWave1[a].animationCycleCounter = 0;
+		necromancerWave1[a].deathAnimationCounter = 0;
+	}
+
 
 	// Informacoes do projetil fireBall
 	fireBall.sprite = load_texture( "images/sprites/fireball40x40.png", l_window, l_renderer );
@@ -299,19 +331,22 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	//necroShot.hitWall = load_sfx( "?" );
 	//necroShot.hitCharacter = load_sfx( "?" );
 	necroShot.damage = 100;
-	necroShot.speed = 3.0;
+	necroShot.speed = 2.0;
 
-	// Definindo info do vetor de necroShots
-	for( a = 0 ; a < 20 ; a++ )
+	// Definindo vetor de necroShot
+	for( x = 0 ; x < 4 ; x++ )
 	{
-		necroShotV[0][a].snipRect.x = 0;
-		necroShotV[0][a].snipRect.y = 0;
-		necroShotV[0][a].snipRect.w = 40;
-		necroShotV[0][a].snipRect.h = 40;
-		necroShotV[0][a].presentedRect.w = 46;
-		necroShotV[0][a].presentedRect.h = 46; 
-		necroShotV[0][a].animationCycleCounter = 0;
-		necroShotV[0][a].activate = 0;
+		for( y = 0 ; y < 30 ; y++ )
+		{
+			necromancerBulletWave1[x][y].snipRect.x = 0;
+			necromancerBulletWave1[x][y].snipRect.y = 0;
+			necromancerBulletWave1[x][y].snipRect.w = 40;
+			necromancerBulletWave1[x][y].snipRect.h = 40;
+			necromancerBulletWave1[x][y].presentedRect.w = 76;
+			necromancerBulletWave1[x][y].presentedRect.h = 76;
+			necromancerBulletWave1[x][y].animationCycleCounter = 0;
+			necromancerBulletWave1[x][y].activate = 0;
+		}
 	}
 
 	// Informacoes do projetil do beholder
@@ -373,8 +408,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	const Uint8 *pressedKeyStates = SDL_GetKeyboardState(NULL);
 
 	// Velocidade x e y do player
-	float velx = player.speed;
-	float vely = player.speed;
+	float velx = 0.0;
+	float vely = 0.0;
 
 	// FPS do jogo
 	int fps = 60;
@@ -405,7 +440,22 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 		{
 			for( y = 0 ; y < 20 ; y++ )
 			{
-				projectile_update( &beholderBulletWave1[x][y], beholderBullet, 8, 6, l_window, l_renderer);
+				projectile_update( &beholderBulletWave1[x][y], beholderBullet, 8, 4, l_window, l_renderer );
+
+				if( beholderBulletWave1[x][y].activate == 1 )
+				{
+					if( circular_collision_detection( player.presentedRect, beholderBulletWave1[x][y].presentedRect, 5 ) != 0 )
+					{
+						player.healthPoints -= beholderBullet.damage;
+						beholderBulletWave1[x][y].activate = 2;
+					}
+				}
+			}
+
+			for( y = 0 ; y < 30 ; y++ )
+			{
+				projectile_update( &necromancerBulletWave1[x][y], necroShot, 5, 5, l_window, l_renderer );
+
 			}
 		}
 					
@@ -566,7 +616,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
         	// Sobre o beholder
            	if( beholderWave1[a].activate == 1 )
            	{
-           		linear_walk_and_shoot( &beholderWave1[a], beholder, player, 10, &beholderBulletWave1[a][beholderWave1[a].bulletNumber] ); 
+           		linear_walk_and_shoot( &beholderWave1[a], beholder, player, &beholderBulletWave1[a][beholderWave1[a].bulletNumber] ); 
 
 				// Beholder ataca o jogador ao enconsta-lo
 				if ( circular_collision_detection( player.presentedRect, beholderWave1[a].presentedRect, 5 ) != 0 )
@@ -593,6 +643,18 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					{
 						beholderWave1[a].healthPoints -= necroShot.damage;
 						necroShotV[0][i2].activate = 0;
+						if( beholderWave1[a].healthPoints <= 0 )
+						{
+							beholderWave1[a].activate = 2;
+						}
+					}				
+				}
+				for ( i2 = 0 ; i2 < 12 ; i2++ )
+				{
+					if( circular_collision_detection( iceSpearV[0][i2].presentedRect, beholderWave1[a].presentedRect, 0 ) != 0 )
+					{
+						beholderWave1[a].healthPoints -= iceSpear.damage;
+						iceSpearV[0][i2].activate = 0;
 						if( beholderWave1[a].healthPoints <= 0 )
 						{
 							beholderWave1[a].activate = 2;
@@ -627,6 +689,98 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 				if( beholderWave1[a].deathAnimationCounter == 160 )
 				{
 					beholderWave1[a].activate = 0;
+				}
+			}	
+        }
+
+        for( a = 0 ; a < 4 ; a++ ) // Necromancer
+        {
+        	if( necromancerWave1[a].activate == 0 )
+        	{
+        		necromancerWave1[a].presentedRect.x = 900;
+        		necromancerWave1[a].presentedRect.y = 900;
+        		necromancerWave1[a].snipRect.x = 0;
+        		necromancerWave1[a].healthPoints = necromancer.healthPoints;
+        		necromancerWave1[a].animationCycleCounter = 0;
+        		necromancerWave1[a].deathAnimationCounter = 0;
+        		necromancerWave1[a].bulletNumber = 0;
+        	}	
+        	// Sobre o necromancer
+           	if( necromancerWave1[a].activate == 1 )
+           	{
+           		necromancer_ia( &necromancerWave1[a], necromancer, player, &necromancerBulletWave1[a][necromancerWave1[a].bulletNumber], &necromancerBulletWave1[a][necromancerWave1[a].bulletNumber+1] ); 
+
+				// Necromancer ataca o jogador ao enconsta-lo
+				if ( circular_collision_detection( player.presentedRect, necromancerWave1[a].presentedRect, 5 ) != 0 )
+				{
+					player.healthPoints -= necromancer.damage;
+				}
+
+				// Necromancer sofre dano pelos projeteis do jogador
+				for ( i2 = 0 ; i2 < 50 ; i2++ )
+				{
+					if( circular_collision_detection( fireBallV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 10 ) != 0 )
+					{
+						necromancerWave1[a].healthPoints -= fireBall.damage;
+						fireBallV[0][i2].activate = 0;
+						if( necromancerWave1[a].healthPoints <= 0 )
+						{
+							necromancerWave1[a].activate = 2;
+						}
+					}				
+				}
+				for ( i2 = 0 ; i2 < 20 ; i2++ )
+				{
+					if( circular_collision_detection( necroShotV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 0 ) != 0 )
+					{
+						necromancerWave1[a].healthPoints -= necroShot.damage;
+						necroShotV[0][i2].activate = 0;
+						if( necromancerWave1[a].healthPoints <= 0 )
+						{
+							necromancerWave1[a].activate = 2;
+						}
+					}				
+				}
+				for ( i2 = 0 ; i2 < 12 ; i2++ )
+				{
+					if( circular_collision_detection( iceSpearV[0][i2].presentedRect, necromancerWave1[a].presentedRect, 0 ) != 0 )
+					{
+						necromancerWave1[a].healthPoints -= iceSpear.damage;
+						iceSpearV[0][i2].activate = 0;
+						if( necromancerWave1[a].healthPoints <= 0 )
+						{
+							necromancerWave1[a].activate = 2;
+						}
+					}				
+				}
+
+				if( player.healthPoints > 0 )
+				{
+					circular_sprite_arrangement( necromancerWave1[a].presentedRect, &player.presentedRect );
+				}
+
+				SDL_RenderCopy( l_renderer, necromancer.sprite, &necromancerWave1[a].snipRect, &necromancerWave1[a].presentedRect );	
+			}
+			// Animacao de morte do necromancer
+			if( necromancerWave1[a].activate == 2 )
+			{
+				if( necromancerWave1[a].deathAnimationCounter == 0)
+				{
+					necromancerWave1[a].snipRect.x = 0;
+				}
+
+				necromancerWave1[a].deathAnimationCounter++;
+
+				SDL_RenderCopy( l_renderer, necromancer.spriteDeath, &necromancerWave1[a].snipRect, &necromancerWave1[a].presentedRect );
+
+				if( necromancerWave1[a].deathAnimationCounter%25 == 0 )
+				{
+					necromancerWave1[a].snipRect.x += 85;
+				}
+				
+				if( necromancerWave1[a].deathAnimationCounter == 150 )
+				{
+					necromancerWave1[a].activate = 0;
 				}
 			}	
         }
@@ -678,14 +832,14 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 					// Esqueletos aparecem
 					if( e.key.keysym.sym == SDLK_RETURN )
 					{
-						for( a = 0 ; a < 4 ; a++ )
+						/*for( a = 0 ; a < 4 ; a++ )
 						{
 							skeletonWave1[a].activate = 1;
 						}
-						/*passing_through_door( 'l', &skeletonWave1[0] );
+						passing_through_door( 'l', &skeletonWave1[0] );
 						passing_through_door( 'r', &skeletonWave1[1] );
 						passing_through_door( 'u', &skeletonWave1[2] );
-						passing_through_door( 'd', &skeletonWave1[3] );*/
+						passing_through_door( 'd', &skeletonWave1[3] );
 						
 						for( a = 0 ; a < 4 ; a++ )
 						{
@@ -694,7 +848,16 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 						passing_through_door( 'l', &beholderWave1[0] );
 						passing_through_door( 'r', &beholderWave1[1] );
 						passing_through_door( 'u', &beholderWave1[2] );
-						passing_through_door( 'd', &beholderWave1[3] );
+						passing_through_door( 'd', &beholderWave1[3] );*/
+
+						for( a = 0 ; a < 4 ; a++ )
+						{
+							necromancerWave1[a].activate = 1;
+						}
+						passing_through_door( 'l', &necromancerWave1[0] );
+						passing_through_door( 'r', &necromancerWave1[1] );
+						passing_through_door( 'u', &necromancerWave1[2] );
+						passing_through_door( 'd', &necromancerWave1[3] );
 					}
 
 					// Itens aparecem
@@ -737,26 +900,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 
 							else if( kindOfShot == 1 )
 							{
-								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
-								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
-								necroShotV[0][j].direction = 'u';
-								necroShotV[0][j].activate = 1;
-
-								j++;
-
-								if( j > 19 )
-								{
-									j = 0;
-								}
-
-							}
-
-							else if( kindOfShot == 2 )
-							{
-								iceSpearV[0][j].presentedRect.x = player.presentedRect.x;
-								iceSpearV[0][j].presentedRect.y = player.presentedRect.y; 
-								iceSpearV[0][j].direction = 'u';
-								iceSpearV[0][j].activate = 1;
+								iceSpearV[0][j2].presentedRect.x = player.presentedRect.x;
+								iceSpearV[0][j2].presentedRect.y = player.presentedRect.y; 
+								iceSpearV[0][j2].direction = 'u';
+								iceSpearV[0][j2].activate = 1;
 
 								j2++;
 
@@ -788,18 +935,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 								}
 							}
 							else if( kindOfShot == 1 )
-							{
-								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
-								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
-								necroShotV[0][j].direction = 'd';
-								necroShotV[0][j].activate = 1;
-								j++;
-								if( j > 19 )
-								{
-									j = 0;
-								}
-							}
-							else if( kindOfShot == 2 )
 							{
 								iceSpearV[0][j2].presentedRect.x = player.presentedRect.x;
 								iceSpearV[0][j2].presentedRect.y = player.presentedRect.y; 
@@ -833,18 +968,6 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 							}
 							else if( kindOfShot == 1 )
 							{
-								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
-								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
-								necroShotV[0][j].direction = 'l';
-								necroShotV[0][j].activate = 1;
-								j++;
-								if( j > 19 )
-								{
-									j = 0;
-								}
-							}
-							else if( kindOfShot == 2 )
-							{
 								iceSpearV[0][j2].presentedRect.x = player.presentedRect.x;
 								iceSpearV[0][j2].presentedRect.y = player.presentedRect.y; 
 								iceSpearV[0][j2].direction = 'l';
@@ -877,22 +1000,10 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 							}
 							else if( kindOfShot == 1 )
 							{
-								necroShotV[0][j].presentedRect.x = player.presentedRect.x;
-								necroShotV[0][j].presentedRect.y = player.presentedRect.y; 
-								necroShotV[0][j].direction = 'r';
-								necroShotV[0][j].activate = 1;
-								j++;
-								if( j > 19 )
-								{
-									j = 0;
-								}
-							}
-							else if( kindOfShot == 2 )
-							{
-								iceSpearV[0][j].presentedRect.x = player.presentedRect.x;
-								iceSpearV[0][j].presentedRect.y = player.presentedRect.y; 
-								iceSpearV[0][j].direction = 'r';
-								iceSpearV[0][j].activate = 1;
+								iceSpearV[0][j2].presentedRect.x = player.presentedRect.x;
+								iceSpearV[0][j2].presentedRect.y = player.presentedRect.y; 
+								iceSpearV[0][j2].direction = 'r';
+								iceSpearV[0][j2].activate = 1;
 								j2++;
 								if( j2 > 11 )
 								{
@@ -937,7 +1048,7 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 			if( pressedKeyStates[SDL_SCANCODE_Q] ) 
 			{
 				kindOfShot++;
-				if( kindOfShot > 2 )
+				if( kindOfShot > 1 )
 				{
 					kindOfShot = 0;
 				}
@@ -1173,6 +1284,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	SDL_DestroyTexture( skeleton.spriteDeath );
 	SDL_DestroyTexture( beholder.sprite );
 	SDL_DestroyTexture( beholder.spriteDeath );
+	SDL_DestroyTexture( necromancer.sprite );
+	SDL_DestroyTexture( necromancer.spriteDeath );
 	SDL_DestroyTexture( fireBall.sprite );
 	SDL_DestroyTexture( iceSpear.sprite );
 	SDL_DestroyTexture( necroShot.sprite );
@@ -1188,6 +1301,8 @@ int gameplay_logic( SDL_Window* l_window, SDL_Renderer* l_renderer )
 	skeleton.spriteDeath = NULL;
 	beholder.sprite = NULL;
 	beholder.spriteDeath = NULL;
+	necromancer.sprite = NULL;
+	necromancer.spriteDeath = NULL;
 	fireBall.sprite = NULL;
 	iceSpear.sprite = NULL;
 	necroShot.sprite = NULL;
@@ -1528,7 +1643,7 @@ void projectile_update( MagicProjectile* bullet, MagicProjectile typeOfBullet, i
 	SDL_RenderCopy( l_renderer, typeOfBullet.sprite, &bullet->snipRect, &bullet->presentedRect );
 }
 
-void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player, int delayShoot,  MagicProjectile* projectile )
+void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character player, MagicProjectile* projectile )
 {
 	// Andar horizontal 
 	if( enemy->direction == 'u' || enemy->direction == 'd' ) 
@@ -1718,6 +1833,180 @@ void linear_walk_and_shoot( Character* enemy, Character typeOfEnemy, Character p
 			}
 			enemy->animationCycleCounter++;	
 		}
+	}
+
+	if( enemy->shootDelayCounter%55 != 0 )
+	{
+		enemy->shootDelayCounter++;
+	} 
+}
+
+void necromancer_ia( Character* enemy, Character typeOfEnemy, Character player, MagicProjectile* projectile, MagicProjectile* projectile2 )
+{
+	int l_up = 0, l_down = 1, l_left = 2, l_right = 3; 
+
+	// Vai atirar
+	if( (enemy->presentedRect.x+enemy->presentedRect.w/2) >= (player.presentedRect.x+25) && (enemy->presentedRect.x+enemy->presentedRect.w/2) <= (player.presentedRect.x+41) )
+	{
+		if( enemy->shootDelayCounter%55 == 0 )
+		{
+			if( enemy->way == l_left )
+			{
+				enemy->snipRect.x = 425; // "Atirando pra esquerda"
+			}
+
+			else if( enemy->way == l_right )
+			{
+				enemy->snipRect.x = 680; // "Atirando pra direita"
+			}
+
+			projectile->presentedRect.x = (enemy->presentedRect.x+enemy->presentedRect.w/2-projectile->presentedRect.w/2);
+			projectile->presentedRect.y = (enemy->presentedRect.y+enemy->presentedRect.h/2-5); 
+			projectile->direction = 'd';
+			projectile->activate = 1;
+			projectile->animationCycleCounter = 0;
+		
+			projectile2->presentedRect.x = (enemy->presentedRect.x+enemy->presentedRect.w/2-projectile->presentedRect.w/2);
+			projectile2->presentedRect.y = (enemy->presentedRect.y); 
+			projectile2->direction = 'u';
+			projectile2->activate = 1;
+			projectile2->animationCycleCounter = 0;
+
+			enemy->bulletNumber += 2;
+
+			if( enemy->bulletNumber > 29 )
+			{
+				enemy->bulletNumber = 0;
+			}
+
+			enemy->shootDelayCounter = 1;	
+		}
+
+		enemy->animationCycleCounter = 0;
+
+		enemy->way = rand() % 4;
+	}	
+	
+	// Andar vertical
+	else if( (enemy->presentedRect.y+enemy->presentedRect.h/2) >= (player.presentedRect.y+25) && (enemy->presentedRect.y+enemy->presentedRect.h/2) <= (player.presentedRect.y+41) )
+	{
+		if( enemy->shootDelayCounter%55 == 0 )
+		{
+			if( enemy->way == l_up )
+			{
+				enemy->snipRect.x = 935; // "Atirando pra cima"
+			}
+			else if( enemy->way == l_down )
+			{
+				enemy->snipRect.x = 170; // "Atirando pra baixo"
+			}
+			projectile->presentedRect.x = (enemy->presentedRect.x+enemy->presentedRect.w/2-10);
+			projectile->presentedRect.y = (enemy->presentedRect.y+enemy->presentedRect.h/2-projectile->presentedRect.h/2); 
+			projectile->direction = 'r';
+			projectile->activate = 1;
+			projectile->animationCycleCounter = 0;
+			
+			projectile2->presentedRect.x = (enemy->presentedRect.x);
+			projectile2->presentedRect.y = (enemy->presentedRect.y+enemy->presentedRect.h/2-projectile->presentedRect.h/2); 
+			projectile2->direction = 'l';
+			projectile2->activate = 1;
+			projectile2->animationCycleCounter = 0;
+
+			enemy->bulletNumber += 2;
+
+			if( enemy->bulletNumber > 29 )
+			{
+				enemy->bulletNumber = 0;
+			}
+			enemy->shootDelayCounter = 1;
+		}
+		enemy->animationCycleCounter = 0;
+		enemy->way = rand() % 4;
+	}
+	
+	else
+	{
+		if( enemy->way == l_up ) // Cima
+		{
+			if( enemy->presentedRect.y > 131 )
+			{
+				enemy->presentedRect.y -= typeOfEnemy.speed;
+			}
+			else
+			{
+				enemy->way = rand() % 4;
+				enemy->animationCycleCounter = 0;
+			}
+			if( enemy->animationCycleCounter%16 == 0 )
+			{
+				enemy->snipRect.x += 85;
+			}
+			if( enemy->snipRect.x < 765 || enemy->snipRect.x > 850 )
+			{
+				enemy->snipRect.x = 765;
+			}
+		}
+		else if( enemy->way == l_down ) // Baixo
+		{
+			if( enemy->presentedRect.y+enemy->presentedRect.h < 580 )
+			{
+				enemy->presentedRect.y += typeOfEnemy.speed;
+			}
+			else
+			{
+				enemy->way = rand() % 4;
+				enemy->animationCycleCounter = 0;
+			}
+			if( enemy->animationCycleCounter%16 == 0 )
+			{
+				enemy->snipRect.x += 85;
+			}
+			if( enemy->snipRect.x < 0 || enemy->snipRect.x > 85 )
+			{
+				enemy->snipRect.x = 0;
+			}	
+		}
+		else if( enemy->way == l_left ) // Esquerda
+		{
+			if( enemy->presentedRect.x > 21 )
+			{
+				enemy->presentedRect.x -= typeOfEnemy.speed;
+			}
+			else
+			{
+				enemy->way = rand() % 4;
+				enemy->animationCycleCounter = 0;
+			}
+			if( enemy->animationCycleCounter%16 == 0 )
+			{
+				enemy->snipRect.x += 85;
+			}
+			if( enemy->snipRect.x < 255 || enemy->snipRect.x > 340 )
+			{
+				enemy->snipRect.x = 255;
+			}
+		}
+		else if( enemy->way == l_right ) // Direta
+		{
+			if( enemy->presentedRect.x+enemy->presentedRect.w < 780 )
+			{
+				enemy->presentedRect.x += typeOfEnemy.speed;
+			}
+			else
+			{
+				enemy->way = rand() % 4;
+				enemy->animationCycleCounter = 0;
+			}
+			if( enemy->animationCycleCounter%16 == 0 )
+			{
+				enemy->snipRect.x += 85;
+			}
+			if( enemy->snipRect.x < 510 || enemy->snipRect.x > 595 )
+			{
+				enemy->snipRect.x = 510;
+			}
+		}
+		enemy->animationCycleCounter++;
 	}
 
 	if( enemy->shootDelayCounter%55 != 0 )

@@ -28,7 +28,7 @@ int STATE_PAUSE = 7;
 int STATE_HISTORY = 8;
 
 // Iniciliza o estado do jogo como tela inicial
-int g_gameState = 2;
+int g_gameState = 0;
 
 // A janela do jogo
 SDL_Window* g_window = NULL;
